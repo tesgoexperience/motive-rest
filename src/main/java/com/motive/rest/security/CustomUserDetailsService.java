@@ -11,16 +11,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import com.motive.rest.user.UserRepository;
+import com.motive.rest.user.UserRepo;
 
 @Component
 public class CustomUserDetailsService implements UserDetailsService {
 
 	@Autowired
-	private final UserRepository repository;
+	private final UserRepo repository;
 
 	@Autowired
-	public CustomUserDetailsService(UserRepository repository) {
+	public CustomUserDetailsService(UserRepo repository) {
 		this.repository = repository;
 	}
 
