@@ -1,4 +1,4 @@
-package com.motive.rest.user.Friend;
+package com.motive.rest.user.Friendship;
 
 
 import javax.persistence.Entity;
@@ -21,26 +21,24 @@ import javax.persistence.ManyToOne;
 @ToString
 @EqualsAndHashCode
 @Entity
-public class FriendRequest {
-
-    public enum REQUEST_STATUS {
-        PENDING, REJECTED, ACCEPTED, CANCELLED
-    } 
+public class Friendship {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
 
     @ManyToOne
-    User requester;
-    @ManyToOne
-    User friend;
-    REQUEST_STATUS status;
+    private User requester;
 
-    public FriendRequest(User requester, User friend) {
-        this.friend = friend;
+    @ManyToOne
+    private User receiver;
+
+    boolean approved;
+
+    public Friendship(User requester, User friend) {
+        this.receiver = friend;
         this.requester = requester;
-        this.status = REQUEST_STATUS.PENDING;
+        approved = false;
     }
 
 }

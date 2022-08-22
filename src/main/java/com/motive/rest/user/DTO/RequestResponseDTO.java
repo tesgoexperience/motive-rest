@@ -12,6 +12,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class RequestResponseDTO {
-    Long id;
+    String username;
     REQUEST_RESPONSE response;
 }

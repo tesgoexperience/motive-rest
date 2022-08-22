@@ -7,14 +7,40 @@ import lombok.ToString;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
-@NoArgsConstructor @Getter @Setter
+@NoArgsConstructor
+@Getter
+@Setter
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor
 public class SearchResultDTO {
-    enum RELATIONSHIP {
-        NOT_REQUEST, FRIENDS, REQUEST_BY_YOU, REQUEST_BY_THEM
+    public enum USER_RELATIONSHIP {
+
+        NO_RELATION {
+            public String getMessage() {
+                return "You are not friends nor do you have any pending requests.";
+            }
+        },
+        FRIEND {
+            public String getMessage() {
+                return "You are friends.";
+            }
+        },
+        REQUESTED_BY_YOU {
+            public String getMessage() {
+                return "You have requested this user and they are yet to respond.";
+            }
+        },
+        REQUESTED_BY_THEM {
+            public String getMessage() {
+                return "They have requested you and you are yet to respond.";
+            }
+        };
+
+        public abstract String getMessage();
+
     }
-    String userName;
-    RELATIONSHIP relation;
+
+    String username;
+    USER_RELATIONSHIP relation;
 }

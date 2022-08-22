@@ -1,7 +1,6 @@
 package com.motive.rest.user;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,13 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import com.motive.rest.user.DTO.RequestResponseDTO;
-import com.motive.rest.user.DTO.SearchResultDTO;
-import com.motive.rest.user.DTO.SocialSummaryDTO;
 @Controller
 @RequestMapping(path = "/user")
 @PreAuthorize("isAuthenticated()")
@@ -47,30 +42,6 @@ public class UserController {
     return newToken;
   }
 
-  @PostMapping(value = "/friend/respond")
-  @ResponseBody
-  public ResponseEntity<String> respondToFriendRequest(@RequestBody RequestResponseDTO response) {
-       return service.respondToRequest(response.getId(), response.getResponse());
-  }
-
-  @PostMapping(value = "/friend/request")
-  @ResponseBody
-  public ResponseEntity<String> requestFriendRequest(@RequestBody String username) {
-       return service.createRequest(username);
-  }
-
-  @GetMapping(value = "/friend")
-  @ResponseBody
-  public SocialSummaryDTO friendSummary() {
-       return service.getSocialSummaryDTO();
-  }
-
- 
-  @GetMapping(value = "/search-users", produces = "application/json")
-  @ResponseBody
-  public List<SearchResultDTO> searchUsers(@RequestParam String search) {
-    return service.searchUsers(search);
-  }
 
   @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
   @ResponseBody

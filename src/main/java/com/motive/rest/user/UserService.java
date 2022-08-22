@@ -20,29 +20,16 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.security.auth.message.callback.PrivateKeyCallback.Request;
-
+import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.security.CustomUserDetailsService;
-import com.motive.rest.user.DTO.SearchResultDTO;
-import com.motive.rest.user.DTO.SocialSummaryDTO;
-import com.motive.rest.user.Friend.FriendRequest;
-import com.motive.rest.user.Friend.FriendRequestRepo;
-import com.motive.rest.user.Friend.FriendRequest.REQUEST_STATUS;
 
-import java.util.ArrayList;
 import java.util.Date;
-
-/* TODO methods should throw errors instead of returning a response entity
- * Instead the controller should catch errors from the service and throw errors
- * This the detail of teh response is not relevant to the service
- * Also, if another service uses this one, the response entity would not be as useful compared to errors thrown
-*/
 
 @Service
 public class UserService {
 
     public enum REQUEST_RESPONSE {
-        ACCEPT, REJECT, CANCEL
+        ACCEPT, REJECT, CANCEL, REMOVE_FRIEND
     }
 
     @Value("${JWT_SIGNATURE}")
@@ -50,9 +37,6 @@ public class UserService {
 
     @Autowired
     UserRepo repo;
-
-    @Autowired
-    FriendRequestRepo friendRequestRepo;
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
@@ -115,9 +99,29 @@ public class UserService {
     }
 
     public boolean userExists(User user) {
-        return repo.findByEmail(user.getEmail()) != null;
+        return repo.findByEmail(user.getEmail()) != null || repo.findByUsername(user.getUsername()) != null;
     }
 
+    public User findByUsername(String username) throws EntityNotFound{
+        User user = repo.findByUsername(username);
+
+        if (user==null) {
+            throw new EntityNotFound("User not found");
+        }
+
+        return user;
+    }
+
+
+    public  List<User>  findByUsernameContaining(String username) throws EntityNotFound{
+        List<User> user = repo.findByUsernameContaining(username);
+
+        if (user==null) {
+            throw new EntityNotFound("User not found");
+        }
+
+        return user;
+    }
     public void registerNewUser(User user) {
 
         user.setPassword(this.encodePassword(user.getPassword()));
@@ -128,110 +132,6 @@ public class UserService {
         user.setRoles(new String[] { "USER" });
 
         repo.save(user);
-
     }
 
-    public List<SearchResultDTO> searchUsers(String search) {
-        List<User> users = repo.findByUsernameContaining(search);
-
-        ArrayList<SearchResultDTO> results = new ArrayList<SearchResultDTO>();
-        for (User user : users) {
-            // results.add(new SearchResultDTO(user.getUsername(), )));
-        }
-        return results;
-    }
-
-    public ResponseEntity<String> respondToRequest(Long id, REQUEST_RESPONSE response) {
-        // not involved in
-        User user = getCurrentUser();
-        FriendRequest request = friendRequestRepo.findById(id).get();
-
-        if (response.equals(REQUEST_RESPONSE.CANCEL)) {
-            // check if the user has made this request
-            List<FriendRequest> requests = user.getRequestsMade();
-            if (requests.contains(request)) {
-                friendRequestRepo.deleteById(request.getId());
-                return new ResponseEntity<String>("Request was cancelled.", HttpStatus.OK);
-            }
-        }
-
-        List<FriendRequest> requests = user.getRequestsReceived();
-        if (!requests.contains(request)) {// TODO report to security if a user tries to respond to friend request they
-                                          // are not involved in
-            return new ResponseEntity<String>("You are not authorized to reject this request. ", HttpStatus.UNAUTHORIZED);
-        }
-
-        if (response.equals(REQUEST_RESPONSE.ACCEPT)) {
-            List<User> responderFriendList = user.getFriends();
-            responderFriendList.add(request.getRequester());
-            user.setFriends(responderFriendList);
-
-            User requester = request.getRequester();
-            List<User> requesterFriendList = requester.getFriends();
-            requesterFriendList.add(user);
-
-            repo.save(user);
-            repo.save(requester);
-        }
-
-        friendRequestRepo.delete(request);
-
-        return new ResponseEntity<String>("You have " + response + "ED the friend request ", HttpStatus.OK);
-    }
-
-    public ResponseEntity<String> createRequest(String username) {
-        User friend = repo.findByUsername(username);
-        if (friend == null) {
-            return new ResponseEntity<String>("Username not found. ", HttpStatus.BAD_REQUEST);
-        }
-
-        User user = getCurrentUser();
-        if (friend.equals(user)) {
-            return new ResponseEntity<String>("You cannot request yourself ", HttpStatus.BAD_REQUEST);
-        }
-
-        List<FriendRequest> friendRequests = user.getRequestsMade();
-        friendRequests.addAll(user.getRequestsReceived());
-
-        for (FriendRequest req : friendRequests) {
-            if (req.getStatus() == REQUEST_STATUS.PENDING) {
-                if (req.getFriend().equals(friend)) {
-                    return new ResponseEntity<String>("You have already requested this user.", HttpStatus.CONFLICT);
-                } else if (req.getRequester().equals(friend)) {
-                    return new ResponseEntity<String>("This user has already requested you.", HttpStatus.CONFLICT);
-                }
-            }
-        }
-
-        for (User f : user.getFriends()) {
-            if (f.equals(friend)) {
-                return new ResponseEntity<String>("You are already friends with this user.", HttpStatus.CONFLICT);
-            }
-        }
-
-        friendRequestRepo.save(new FriendRequest(user, friend));
-
-        return new ResponseEntity<String>("Friend requested", HttpStatus.OK);
-    }
-
-    public SocialSummaryDTO getSocialSummaryDTO() {
-        User user = getCurrentUser();
-
-        List<Pair<String, Long>> reqMade = new ArrayList<>();
-        for (FriendRequest req : user.getRequestsMade()) {
-            reqMade.add(Pair.of(req.getFriend().getUsername(), req.getId()));
-        }
-
-        List<Pair<String, Long>> reqReceived = new ArrayList<>();
-        for (FriendRequest req : user.getRequestsReceived()) {
-            reqReceived.add(Pair.of(req.getRequester().getUsername(), req.getId()));
-        }
-
-        List<String> friends = new ArrayList<>();
-        for (User friend : user.getFriends()) {
-            friends.add(friend.getUsername());
-        }
-
-        return new SocialSummaryDTO(friends, reqReceived, reqMade);
-    }
 }

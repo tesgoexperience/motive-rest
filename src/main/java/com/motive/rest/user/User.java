@@ -5,7 +5,7 @@ import javax.persistence.FetchType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.motive.rest.user.Friend.FriendRequest;
+import com.motive.rest.user.Friendship.Friendship;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,16 +18,10 @@ import lombok.EqualsAndHashCode;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
-
-import org.hibernate.annotations.ManyToAny;
-
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ElementCollection;
 
 @Entity
 @NoArgsConstructor
@@ -62,14 +56,13 @@ public class User {
     @JsonIgnore
     private boolean verified;
 
-    @ManyToMany
-    List<User> friends;
-
+    @JsonIgnore
     @OneToMany(mappedBy = "requester", fetch = FetchType.LAZY)
-    List<FriendRequest> requestsMade;
+    List<Friendship> requestsMade;
 
-    @OneToMany(mappedBy = "friend", fetch = FetchType.LAZY)
-    List<FriendRequest> requestsReceived;
+    @JsonIgnore
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
+    List<Friendship> requestsReceived;
 
     public User(String email, String password) {
         this.email = email;
@@ -86,5 +79,4 @@ public class User {
     public String getPassword() {
         return this.password;
     }
-
 }
