@@ -1,7 +1,11 @@
 package com.motive.rest.user;
 
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.Pair;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -16,6 +20,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.security.CustomUserDetailsService;
 
 import java.util.Date;
@@ -23,11 +28,15 @@ import java.util.Date;
 @Service
 public class UserService {
 
+    public enum REQUEST_RESPONSE {
+        ACCEPT, REJECT, CANCEL, REMOVE_FRIEND
+    }
+
     @Value("${JWT_SIGNATURE}")
     String JWTSignature;
 
     @Autowired
-    UserRepository repo;
+    UserRepo repo;
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
@@ -90,18 +99,39 @@ public class UserService {
     }
 
     public boolean userExists(User user) {
-        return repo.findByEmail(user.getEmail()) != null;
+        return repo.findByEmail(user.getEmail()) != null || repo.findByUsername(user.getUsername()) != null;
     }
 
+    public User findByUsername(String username) throws EntityNotFound{
+        User user = repo.findByUsername(username);
+
+        if (user==null) {
+            throw new EntityNotFound("User not found");
+        }
+
+        return user;
+    }
+
+
+    public  List<User>  findByUsernameContaining(String username) throws EntityNotFound{
+        List<User> user = repo.findByUsernameContaining(username);
+
+        if (user==null) {
+            throw new EntityNotFound("User not found");
+        }
+
+        return user;
+    }
     public void registerNewUser(User user) {
 
         user.setPassword(this.encodePassword(user.getPassword()));
         // this.set new String[] { "USER" });
 
-        // TODO remove the need for roles JWT token generation doesnt work without this roles array, not sure why
-        user.setRoles(new String[] { "USER" } );
+        // TODO remove the need for roles JWT token generation doesnt work without this
+        // roles array, not sure why
+        user.setRoles(new String[] { "USER" });
 
         repo.save(user);
-
     }
+
 }
