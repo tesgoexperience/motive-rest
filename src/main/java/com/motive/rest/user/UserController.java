@@ -22,12 +22,11 @@ public class UserController {
   @Autowired
   private UserService service;
 
-  // returns user info
+  // return information about the authenticated user
   @GetMapping(value = "/", produces = "application/json")
   @ResponseBody
-  public User home() throws Exception {
-    User dto = service.getCurrentUser(); // TODO return DTO
-    return dto;
+  public String home() throws Exception {
+    return service.getCurrentUser().getUsername();
   }
 
   // Tokens have a 5 minute expiration. So we give the client the ability to
@@ -41,7 +40,6 @@ public class UserController {
 
     return newToken;
   }
-
 
   @PostMapping(value = "/login", consumes = "application/json", produces = "application/json")
   @ResponseBody
