@@ -6,6 +6,7 @@ import javax.persistence.FetchType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.motive.rest.user.Friendship.Friendship;
+import com.motive.rest.user.Friendship.Circle.Circle;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,7 +34,6 @@ public class User {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    @JsonIgnore
     private Long id;
 
     @NonNull
@@ -50,17 +50,14 @@ public class User {
     @Setter(AccessLevel.NONE)
     private String password;
 
-    @JsonIgnore
     private String[] roles;
 
-    @JsonIgnore
     private boolean verified;
 
     @JsonIgnore
     @OneToMany(mappedBy = "requester", fetch = FetchType.LAZY)
     List<Friendship> requestsMade;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
     List<Friendship> requestsReceived;
 
