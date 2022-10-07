@@ -6,7 +6,6 @@ import javax.persistence.FetchType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.motive.rest.user.Friendship.Friendship;
-import com.motive.rest.user.Friendship.Circle.Circle;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
