@@ -11,13 +11,16 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.motive.rest.exceptions.BadInteraction;
+import com.motive.rest.exceptions.IllogicalRequest;
+import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.user.DTO.SearchResultDTO;
 import com.motive.rest.user.DTO.SocialSummaryDTO;
 
 @Service
 public class FriendshipService {
+
+    public static final String USER_NOT_FRIEND_ERROR = "USER IS NOT YOUR FRIEND";
 
     @Autowired
     private UserService userService;
@@ -50,6 +53,16 @@ public class FriendshipService {
 
     }
 
+    public void validateFriendship(User otherUser){
+        if (!isFriends(otherUser)) {
+            throw new BadUserInput(USER_NOT_FRIEND_ERROR);
+        }
+    }
+
+    public boolean isFriends(User otherUser){
+        return getRelation(otherUser).equals(USER_RELATIONSHIP.FRIEND);
+    }
+
     public List<Friendship> getAllFriendships() {
 
         User user = userService.getCurrentUser();
@@ -59,6 +72,10 @@ public class FriendshipService {
         return friendships;
     }
 
+    public Friendship getFriendshipWithUser(String username) throws EntityNotFound {
+       return getFriendshipWithUser(userService.findByUsername(username));
+    }
+    
     public Friendship getFriendshipWithUser(User friend) throws EntityNotFound {
         List<Friendship> friendships = getAllFriendships();
         for (Friendship friendship : friendships) {
@@ -67,7 +84,7 @@ public class FriendshipService {
             }
         }
 
-        throw new EntityNotFound("Friendship with user was not found");
+        throw new EntityNotFound(USER_NOT_FRIEND_ERROR);
     }
 
     public List<Friendship> getPendingFriendships() {
@@ -95,7 +112,7 @@ public class FriendshipService {
         return results;
     }
 
-    public void respondToRequest(String username, boolean accept) throws BadInteraction, EntityNotFound {
+    public void respondToRequest(String username, boolean accept) throws IllogicalRequest, EntityNotFound {
 
         User user = userService.getCurrentUser();
         User friend = userService.findByUsername(username);
@@ -108,7 +125,7 @@ public class FriendshipService {
         }
 
         if (request.approved) {
-            throw new BadInteraction("Request is already approved.");
+            throw new IllogicalRequest("Request is already approved.");
         }
 
         if (accept) {
@@ -120,7 +137,7 @@ public class FriendshipService {
 
     }
 
-    public void createRequest(String username) throws EntityNotFound, BadInteraction {
+    public void createRequest(String username) throws EntityNotFound, IllogicalRequest {
 
         User friend = userService.findByUsername(username);
         User user = userService.getCurrentUser();
@@ -130,12 +147,12 @@ public class FriendshipService {
         }
 
         if (friend.equals(user)) {
-            throw new BadInteraction("You cannot request yourself.");
+            throw new IllogicalRequest("You cannot request yourself.");
         }
 
         USER_RELATIONSHIP relation = getRelation(friend);
         if (!relation.equals(USER_RELATIONSHIP.NO_RELATION)) {
-            throw new BadInteraction(relation.getMessage());
+            throw new IllogicalRequest(relation.getMessage());
         }
 
         repo.save(new Friendship(user, friend));

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.motive.rest.exceptions.BadInteraction;
+import com.motive.rest.exceptions.IllogicalRequest;
 import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.user.DTO.SearchResultDTO;
 import com.motive.rest.user.DTO.SocialSummaryDTO;
@@ -39,9 +39,8 @@ public class FriendshipController {
 
     @PostMapping(value = "/accept")
     @ResponseBody
-    public void acceptFriendRequest(@RequestParam String username) throws BadInteraction, EntityNotFound {
+    public void acceptFriendRequest(@RequestParam String username) throws IllogicalRequest, EntityNotFound {
         service.respondToRequest(username, true);
-
     }
 
     @GetMapping(value = "/search", produces = "application/json")
@@ -52,13 +51,13 @@ public class FriendshipController {
 
     @PostMapping(value = "/reject")
     @ResponseBody
-    public void refuseFriendRequest(@RequestParam String username) throws BadInteraction, EntityNotFound {
+    public void refuseFriendRequest(@RequestParam String username) throws IllogicalRequest, EntityNotFound {
         service.respondToRequest(username, false);
     }
 
     @PostMapping(value = "/request")
     @ResponseBody
-    public void requestFriend(@RequestParam String username) throws EntityNotFound, BadInteraction {
+    public void requestFriend(@RequestParam String username) throws EntityNotFound, IllogicalRequest {
         service.createRequest(username);
     }
 
