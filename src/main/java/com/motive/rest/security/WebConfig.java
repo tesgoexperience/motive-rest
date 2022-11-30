@@ -16,7 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**"); //TODO only allow any client access to specific instance controllers
+        registry.addMapping("/**"); 
         // .allowedOrigins(ReactClient);
 
     }

@@ -38,7 +38,7 @@ public class SecurityPolicy extends WebSecurityConfigurerAdapter{
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception { 
-		http.cors().and().csrf().disable()
+		http.cors().and().csrf().disable() //TODO
 		.addFilterAfter(getFilter(JWTSignature), UsernamePasswordAuthenticationFilter.class)
 		.authorizeRequests()
 		.antMatchers(HttpMethod.POST, "/user/login").permitAll()

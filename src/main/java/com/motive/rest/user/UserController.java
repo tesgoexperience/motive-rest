@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.GetMapping;
 
+
+//TODO refactor according to https://github.com/joseph-redmond/lLamaWork/blob/abf66589b9720a4f5c330e982b0789d6de9572e9/src/main/java/tech/jrdev/llamawork/web/rest/UserJWTController.java
 @Controller
 @RequestMapping(path = "/user")
 @PreAuthorize("isAuthenticated()")
@@ -59,7 +61,7 @@ public class UserController {
   @PreAuthorize("isAnonymous()")
   @PostMapping(value = "/register", consumes = "application/json", produces = "application/json")
   @ResponseBody
-  public ResponseEntity<String> register(@RequestBody User user) {
+  public ResponseEntity<String> register(@RequestBody User /*TODO change to user DTO and use constraints*/ user) {
 
     if (!service.validateUserInfo(user)) {
       return new ResponseEntity<String>("password or email doesn't meet requirements", HttpStatus.BAD_REQUEST);

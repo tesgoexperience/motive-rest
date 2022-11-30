@@ -1,17 +1,16 @@
-package com.motive.rest.user.DTO;
+package com.motive.rest.user.dto;
 
 import com.motive.rest.user.UserService.REQUEST_RESPONSE;
+import com.motive.rest.dto.DTO;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
-public class RequestResponseDTO {
+public class RequestResponseDTO implements DTO{
     String username;
     REQUEST_RESPONSE response;
 }

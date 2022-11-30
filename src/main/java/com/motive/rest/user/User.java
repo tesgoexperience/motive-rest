@@ -4,8 +4,9 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.motive.rest.user.Friendship.Friendship;
+import com.motive.rest.user.friendship.Friendship;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,8 +30,10 @@ import javax.persistence.Column;
 @Setter
 @ToString
 @EqualsAndHashCode
+@JsonIgnoreType
 public class User {
 
+    // CHANGE TO GUID
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private Long id;
@@ -55,10 +58,10 @@ public class User {
 
     @JsonIgnore
     @OneToMany(mappedBy = "requester", fetch = FetchType.LAZY)
-    List<Friendship> requestsMade;
+    private List<Friendship> requestsMade;
 
     @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
-    List<Friendship> requestsReceived;
+    private List<Friendship> requestsReceived;
 
     public User(String email, String password) {
         this.email = email;
