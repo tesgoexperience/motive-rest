@@ -6,33 +6,22 @@ import org.junit.runner.RunWith;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
-import com.github.javafaker.Faker;
 import com.motive.rest.util.AttendanceUtil;
 import com.motive.rest.util.MvcUtil;
 import com.motive.rest.util.MotiveUtil;
 import com.motive.rest.util.UserUtil;
-import com.mysql.cj.xdevapi.JsonArray;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.text.SimpleDateFormat;
-import java.util.concurrent.TimeUnit;
-
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -45,7 +34,6 @@ public class AttendanceTest {
     private MotiveUtil motiveUtil;
     private MvcUtil mvcUtil;
     private AttendanceUtil attendanceUtil;
-    private JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
 
     @Before
     public void createContext() throws Exception {
@@ -106,7 +94,7 @@ public class AttendanceTest {
         JSONObject friend = userUtil.createFriend(owner);
 
         JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
-        attendanceUtil.requestAttendance(friend, motive);
+        attendanceUtil.addPendingAttendee(friend, motive);
 
         motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/managing", owner).get(0);
 
@@ -117,28 +105,81 @@ public class AttendanceTest {
     }
 
     @Test
+    public void get_pending_requests() throws Exception {
+        JSONObject owner = userUtil.generateUser(true);
+        JSONObject friend = userUtil.createFriend(owner);
+
+        JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
+        attendanceUtil.addPendingAttendee(friend, motive);
+
+        motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/managing", owner).get(0);
+        JSONArray requests = attendanceUtil.getPendingRequests(friend, motive);
+        assertEquals(requests.size(),1);
+    }
+    
+    @Test
+    public void request_motive_twice() throws Exception {
+        // check if friends can see motive attendance when anonymous
+
+        JSONObject owner = userUtil.generateUser(true);
+        JSONObject friend = userUtil.createFriend(owner);
+
+        JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
+        attendanceUtil.addPendingAttendee(friend, motive);
+
+        // request the motive again and expect the error
+        JSONObject attendanceRequest = new JSONObject();
+        attendanceRequest.put("motive", motive.get("id"));
+        attendanceRequest.put("anonymous", true);
+
+        mvcUtil.postAndExpectError("/attendance/request", friend, attendanceRequest, "Attendance already registered",status().isConflict());
+        
+    }
+    
+    @Test
     public void accept_request_for_motive() throws Exception {
         JSONObject owner = userUtil.generateUser(true);
         JSONObject friend = userUtil.createFriend(owner);
 
         JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
-        attendanceUtil.requestAttendance(friend, motive);
+        attendanceUtil.addPendingAttendee(friend, motive);
 
-        // accept request
+        // get the motive
         motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/managing", owner).get(0);
 
-        MvcResult result = mvc.perform(get("/attendance/pending").param("motiveId",String.valueOf(motive.get("id")))
-        .header("authorization", owner.get("token")))
-        .andExpect(status().isOk()).andReturn();
+        JSONArray requests = attendanceUtil.getPendingRequests(friend, motive);
 
-        JSONObject firstRequest = (JSONObject)((JSONArray) parser.parse(result.getResponse().getContentAsString())).get(0);
+        JSONObject request = (JSONObject)requests.get(0);
+        JSONObject attendanceResponse = new JSONObject();
 
-        //TODO fininsh test
+        attendanceResponse.put("attendance", request.get("id"));
+        attendanceResponse.put("accept", "true");
+
+        mvcUtil.postAndExpectOk("/attendance/respond", owner, attendanceResponse);    
+
+        motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/managing", owner).get(0);
+
+        assertEquals(friend.get("username"), ((JSONArray)motive.get("confirmedAttendance")).get(0));
+
+        // ensure there is none in the requests
+        assertTrue(((JSONArray)motive.get("requests")).isEmpty());
+
     }
-    public void get_pending_requests() {
+   
+    @Test
+    public void request_anonymously() throws Exception {
         // check if friends can see motive attendance when anonymous
-    }
-    public void request_anonymously() {
-        // check if friends can see motive attendance when anonymous
+        JSONObject owner = userUtil.generateUser(true);
+        JSONObject friend = userUtil.createFriend(owner);
+        JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
+        attendanceUtil.addConfirmedAttendee(owner, friend, motive, true); 
+
+        // browse a motive and check who is attending it
+        JSONObject friend2 = userUtil.createFriend(owner);
+
+        motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/", friend2).get(0);
+
+        assertEquals(1L,motive.get("confirmedAttendanceAnonymous"));
+        assertTrue(((JSONArray)motive.get("confirmedAttendance")).isEmpty());
     }
 }

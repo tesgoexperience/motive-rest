@@ -66,7 +66,7 @@ public class MvcUtil {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        return (JSONArray) parser.parse(browseMotiveResult.getResponse().getContentAsString());
+        return getArrayResponse(browseMotiveResult);
     }
 
     public JSONArray getArrayAndExpectOk(String url, JSONObject user, String param) throws Exception {
@@ -75,6 +75,11 @@ public class MvcUtil {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        return (JSONArray) parser.parse(browseMotiveResult.getResponse().getContentAsString());
+        return getArrayResponse(browseMotiveResult);
+    }
+
+    public JSONArray getArrayResponse( MvcResult result) throws UnsupportedEncodingException, ParseException{
+        return (JSONArray) parser.parse(result.getResponse().getContentAsString());
+
     }
 }
