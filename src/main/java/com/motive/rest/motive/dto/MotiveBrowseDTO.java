@@ -26,10 +26,20 @@ public class MotiveBrowseDTO implements DTO{
         return this.owner.getUsername();
     }
 
+    public int getConfirmedAttendanceAnonymous(){
+        int anons = 0;
+        for (Attendance att : attendance) {
+            if (att.getStatus().equals(ATTENDANCE_STATUS.CONFIRMED) && att.isAnonymous()) {
+                anons++;
+            }
+        }
+        return anons;
+    }
+
     public List<String> getConfirmedAttendance(){
         List<String> attending = new ArrayList<>();
         for (Attendance att : attendance) {
-            if (att.getStatus().equals(ATTENDANCE_STATUS.CONFIRMED)) {
+            if (att.getStatus().equals(ATTENDANCE_STATUS.CONFIRMED) && !att.isAnonymous()) {
                 attending.add(att.getUser().getUsername());
             }
         }
