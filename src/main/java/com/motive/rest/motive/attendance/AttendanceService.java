@@ -5,7 +5,6 @@ import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +24,6 @@ import com.motive.rest.user.friendship.FriendshipService;
 
 @Service
 public class AttendanceService {
-    public enum MOTIVE_RELATION {
-        CONFIRMED, REQUESTED, NO_ATTENDANCE
-    }
-
     @Autowired
     DTOFactory dtoFactory;
     @Autowired
@@ -83,15 +78,6 @@ public class AttendanceService {
         }
     }
 
-    public AttendanceDTO getMyAttendance(Motive motive) {
-        Optional<Attendance> attendance = repo.findByMotiveAndUser(motive, userService.getCurrentUser());
-        if (attendance.isPresent()) {
-            return (AttendanceDTO) dtoFactory.getDto(attendance.get(), DTO_TYPE.ATTENDANCE);
-        }
-
-        throw new EntityNotFoundException("Couldn't find attendance");
-    }
-
     public List<AttendanceDTO> getPendingAttendance(Long motive) {
         return getPendingAttendance(motiveService.getMotive(motive));
     }
@@ -103,30 +89,7 @@ public class AttendanceService {
                 DTO_TYPE.ATTENDANCE);
     }
 
-    @SuppressWarnings("unchecked")
-    public List<AttendanceDTO> getConfirmedAttendance(Motive motive) {
-        return (List<AttendanceDTO>) dtoFactory.getDto(
-                repo.findByMotiveAndStatus(motive, ATTENDANCE_STATUS.CONFIRMED),
-                DTO_TYPE.ATTENDANCE);
-    }
-
     private boolean hasAttendance(User user, Motive motive) {
         return repo.findByMotiveAndUser(motive, user).isPresent();
-    }
-
-    public MOTIVE_RELATION getRelation(Motive motive) {
-        User user = userService.getCurrentUser();
-
-        Optional<Attendance> attendance = repo.findByMotiveAndUser(motive, user);
-
-        if (!attendance.isPresent()) {
-            return MOTIVE_RELATION.NO_ATTENDANCE;
-        }
-
-        if (attendance.get().getStatus().equals(ATTENDANCE_STATUS.CONFIRMED)) {
-            return MOTIVE_RELATION.CONFIRMED;
-        }
-
-        return MOTIVE_RELATION.REQUESTED;
     }
 }
