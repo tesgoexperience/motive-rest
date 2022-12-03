@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import com.motive.rest.motive.Motive;
 import com.motive.rest.motive.MotiveService;
 import com.motive.rest.motive.attendance.Attendance.ATTENDANCE_STATUS;
 import com.motive.rest.motive.attendance.dto.AttendanceDTO;
+import com.motive.rest.motive.attendance.dto.ResponseDto;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 import com.motive.rest.user.friendship.FriendshipService;
@@ -55,8 +57,8 @@ public class AttendanceService {
         repo.save(attendance);
     }
 
-    public void respondToAttendanceRequest(Long attendanceId, boolean accept) {
-        Optional<Attendance> optionalAttendance = repo.findById(attendanceId);
+    public void respondToAttendanceRequest(ResponseDto response) {
+        Optional<Attendance> optionalAttendance = repo.findById(response.getAttendance());
 
         if (!optionalAttendance.isPresent()) {
             throw new EntityNotFound("Attendance not found");
@@ -70,10 +72,10 @@ public class AttendanceService {
         }
 
         if (attendance.getStatus().equals(ATTENDANCE_STATUS.CONFIRMED)) {
-            throw new UnauthorizedRequest("Attendance already confirmed");
+            throw new IllogicalRequest("Attendance already confirmed");
         }
 
-        if (accept) {
+        if (response.isAccept()) {
             attendance.setStatus(ATTENDANCE_STATUS.CONFIRMED);
             repo.save(attendance);
         } else {

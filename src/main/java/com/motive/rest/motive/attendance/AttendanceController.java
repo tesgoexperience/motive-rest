@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.motive.rest.dto.DTOFactory.DTO_TYPE;
 import com.motive.rest.motive.attendance.dto.AttendanceDTO;
+import com.motive.rest.motive.attendance.dto.ResponseDto;
 
 import org.springframework.stereotype.Controller;
 
@@ -41,8 +42,8 @@ public class AttendanceController {
 
     @PostMapping(value = "/respond")
     @ResponseBody
-    public void respondToAttendanceRequest(@RequestBody Map<String,String> req){
-        service.respondToAttendanceRequest(Long.valueOf(req.get("attendance")), req.get("accept").equals("true"));
+    public void respondToAttendanceRequest(@RequestBody ResponseDto req){
+        service.respondToAttendanceRequest(req);
     }
 
 }
