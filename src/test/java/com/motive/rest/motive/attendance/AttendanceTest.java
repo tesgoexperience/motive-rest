@@ -20,6 +20,10 @@ import com.motive.rest.util.UserUtil;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Random;
+
+import org.hibernate.id.GUIDGenerator;
+
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -94,7 +98,7 @@ public class AttendanceTest {
         JSONObject friend = userUtil.createFriend(owner);
 
         JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
-        attendanceUtil.addPendingAttendee(friend, motive);
+        attendanceUtil.addPendingAttendee(friend, motive, false);
 
         motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/managing", owner).get(0);
 
@@ -110,7 +114,7 @@ public class AttendanceTest {
         JSONObject friend = userUtil.createFriend(owner);
 
         JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
-        attendanceUtil.addPendingAttendee(friend, motive);
+        attendanceUtil.addPendingAttendee(friend, motive, false);
 
         motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/managing", owner).get(0);
         JSONArray requests = attendanceUtil.getPendingRequests(friend, motive);
@@ -125,7 +129,7 @@ public class AttendanceTest {
         JSONObject friend = userUtil.createFriend(owner);
 
         JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
-        attendanceUtil.addPendingAttendee(friend, motive);
+        attendanceUtil.addPendingAttendee(friend, motive, false);
 
         // request the motive again and expect the error
         JSONObject attendanceRequest = new JSONObject();
@@ -142,7 +146,7 @@ public class AttendanceTest {
         JSONObject friend = userUtil.createFriend(owner);
 
         JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
-        attendanceUtil.addPendingAttendee(friend, motive);
+        attendanceUtil.addPendingAttendee(friend, motive, false);
 
         // get the motive
         motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/managing", owner).get(0);
@@ -181,5 +185,104 @@ public class AttendanceTest {
 
         assertEquals(1L,motive.get("confirmedAttendanceAnonymous"));
         assertTrue(((JSONArray)motive.get("confirmedAttendance")).isEmpty());
+    }
+
+    @Test
+    public void view_confirmed_attendnaces() throws Exception{
+        JSONObject owner = userUtil.generateUser(true);
+        JSONObject friend = userUtil.createFriend(owner);
+        JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
+        attendanceUtil.addConfirmedAttendee(owner, friend, motive, false); 
+
+        JSONObject friend2 = userUtil.createFriend(owner);
+        motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/", friend2).get(0);
+        assertTrue(((JSONArray)motive.get("confirmedAttendance")).contains(friend.get("username")));     
+    }
+
+    @Test
+    public void respond_to_attendance_request_for_another_users_motive() throws Exception{
+        JSONObject owner = userUtil.generateUser(true);
+        JSONObject friend = userUtil.createFriend(owner);
+
+        JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
+        attendanceUtil.addPendingAttendee(friend, motive, false);
+
+        // get the motive
+        motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/managing", owner).get(0);
+
+        JSONArray requests = attendanceUtil.getPendingRequests(owner, motive);
+
+        JSONObject request = (JSONObject)requests.get(0);
+        JSONObject attendanceResponse = new JSONObject();
+
+        attendanceResponse.put("attendance", request.get("id"));
+        attendanceResponse.put("accept", "false");
+
+        mvcUtil.postAndExpectError("/attendance/respond", friend, attendanceResponse, "You cannot to attendance request as you not the motive owner", status().isUnauthorized());
+    }
+
+    @Test
+    public void reject_attendance_request() throws Exception{
+        JSONObject owner = userUtil.generateUser(true);
+        JSONObject friend = userUtil.createFriend(owner);
+
+        JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
+        attendanceUtil.addPendingAttendee(friend, motive, false);
+
+        // get the motive
+        motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/managing", owner).get(0);
+
+        JSONArray requests = attendanceUtil.getPendingRequests(friend, motive);
+
+        JSONObject request = (JSONObject)requests.get(0);
+        JSONObject attendanceResponse = new JSONObject();
+
+        attendanceResponse.put("attendance", request.get("id"));
+        attendanceResponse.put("accept", "false");
+
+        mvcUtil.postAndExpectOk("/attendance/respond", owner, attendanceResponse);    
+
+        motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/managing", owner).get(0);
+
+        // ensure there is none in the requests
+        assertTrue(((JSONArray)motive.get("requests")).isEmpty());
+        assertTrue(((JSONArray)motive.get("confirmedAttendance")).isEmpty());
+        assertTrue(((JSONArray)motive.get("confirmedAttendanceAnonymous")).isEmpty());
+
+    }
+
+    @Test
+    public void respond_to_already_confirmed_attendance() throws Exception{
+        JSONObject owner = userUtil.generateUser(true);
+        JSONObject friend = userUtil.createFriend(owner);
+
+        JSONObject motive = motiveUtil.generateSimpleMotiveAndSave(owner);
+        attendanceUtil.addPendingAttendee(friend, motive, false);
+
+        // get the motive
+        motive = (JSONObject)mvcUtil.getArrayAndExpectOk("/motive/managing", owner).get(0);
+
+        JSONArray requests = attendanceUtil.getPendingRequests(friend, motive);
+
+        JSONObject request = (JSONObject)requests.get(0);
+        JSONObject attendanceResponse = new JSONObject();
+
+        attendanceResponse.put("attendance", request.get("id"));
+        attendanceResponse.put("accept", "true");
+
+        mvcUtil.postAndExpectOk("/attendance/respond", owner, attendanceResponse);    
+        mvcUtil.postAndExpectError("/attendance/respond", owner, attendanceResponse,"Attendance already confirmed", status().isConflict());    
+
+    }
+
+    @Test
+    public void respond_to_nonexistent_attendance() throws Exception{
+        JSONObject owner = userUtil.generateUser(true);
+
+        JSONObject attendanceResponse = new JSONObject();
+        attendanceResponse.put("attendance",new Random().nextLong());
+        attendanceResponse.put("accept", "true");
+
+        mvcUtil.postAndExpectError("/attendance/respond", owner, attendanceResponse, "Attendance not found", status().isNotFound());
     }
 }

@@ -19,10 +19,10 @@ public class AttendanceUtil {
         mvcUtil = new MvcUtil(mvc);
     }
 
-    public void addPendingAttendee(JSONObject user, JSONObject motive) throws Exception{
+    public void addPendingAttendee(JSONObject user, JSONObject motive, boolean anonymous) throws Exception{
         JSONObject attendanceRequest = new JSONObject();
         attendanceRequest.put("motive", motive.get("id"));
-        attendanceRequest.put("anonymous", true);
+        attendanceRequest.put("anonymous", anonymous);
         mvcUtil.postAndExpectOk("/attendance/request", user, attendanceRequest);
     }
 
