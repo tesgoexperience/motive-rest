@@ -1,10 +1,12 @@
-package com.motive.rest.user.Friendship;
+package com.motive.rest.user.friendship;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
-import com.motive.rest.user.DTO.SearchResultDTO.USER_RELATIONSHIP;
+import com.motive.rest.user.dto.SearchResultDTO;
+import com.motive.rest.user.dto.SocialSummaryDTO;
+import com.motive.rest.user.dto.SearchResultDTO.USER_RELATIONSHIP;
 
 import org.springframework.stereotype.Service;
 
@@ -14,8 +16,6 @@ import java.util.List;
 import com.motive.rest.exceptions.IllogicalRequest;
 import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.exceptions.EntityNotFound;
-import com.motive.rest.user.DTO.SearchResultDTO;
-import com.motive.rest.user.DTO.SocialSummaryDTO;
 
 @Service
 public class FriendshipService {
@@ -28,12 +28,14 @@ public class FriendshipService {
     @Autowired
     private FriendRepo repo;
 
-    public USER_RELATIONSHIP getRelation(User otherUser) {
+    // Only use get the specific friendship status. Do not use to find out if users
+    // are friends
+    public USER_RELATIONSHIP getSpecificRelationship(User otherUser) {
         User user = userService.getCurrentUser();
 
         for (Friendship req : user.getRequestsMade()) {
             if (req.getReceiver().equals(otherUser)) {
-                if (req.approved) {
+                if (req.isApproved()) {
                     return USER_RELATIONSHIP.FRIEND;
                 }
                 return USER_RELATIONSHIP.REQUESTED_BY_YOU;
@@ -42,7 +44,7 @@ public class FriendshipService {
 
         for (Friendship req : user.getRequestsReceived()) {
             if (req.getRequester().equals(otherUser)) {
-                if (req.approved) {
+                if (req.isApproved()) {
                     return USER_RELATIONSHIP.FRIEND;
                 }
                 return USER_RELATIONSHIP.REQUESTED_BY_THEM;
@@ -53,31 +55,68 @@ public class FriendshipService {
 
     }
 
-    public void validateFriendship(User otherUser){
+    public void validateFriendship(User otherUser) {
         if (!isFriends(otherUser)) {
             throw new BadUserInput(USER_NOT_FRIEND_ERROR);
         }
     }
 
-    public boolean isFriends(User otherUser){
-        return getRelation(otherUser).equals(USER_RELATIONSHIP.FRIEND);
+    public List<User> getApprovedFriendshipsUserObjects() {
+       return extractFriendUserObjects(getApprovedFriendships());
     }
 
-    public List<Friendship> getAllFriendships() {
+    // returns all the other users who in the friendship with the context user
+    private List<User> extractFriendUserObjects(List<Friendship> friendships){
+        List<User> friends = new ArrayList<>();
+        for (Friendship friendship : friendships) {
+            if (friendship.getRequester().equals(userService.getCurrentUser())) {
+                friends.add(friendship.getReceiver());
+            } else {
+                friends.add(friendship.getRequester());
+            }
+        }
+        return friends;
+    }
+    public boolean isFriends(User otherUser) {
+        return getApprovedFriendshipsUserObjects().contains(otherUser);
+    }
+
+    public List<Friendship> getApprovedFriendships() {
+        return getFriendships(false, true);
+    }
+
+    public Friendship getFriendshipWithUser(String username) throws EntityNotFound {
+        return getFriendshipWithUser(userService.findByUsername(username));
+    }
+
+    private List<Friendship> getFriendships(boolean includePending, boolean includeApproved) {
 
         User user = userService.getCurrentUser();
         List<Friendship> friendships = user.getRequestsMade();
         friendships.addAll(user.getRequestsReceived());
 
+        if (!includePending) {
+            friendships.removeIf(e -> !e.isApproved());
+        }
+
+        if (!includeApproved) {
+            friendships.removeIf(Friendship::isApproved);
+        }
+
         return friendships;
     }
 
-    public Friendship getFriendshipWithUser(String username) throws EntityNotFound {
-       return getFriendshipWithUser(userService.findByUsername(username));
+    // NOTE includes pending friendships
+    public List<Friendship> getAllFriendshipsIncludingPending() {
+        return getFriendships(true, true);
     }
-    
+
+    public List<Friendship> getPendingFriendships() {
+        return getFriendships(true, false);
+    }
+
     public Friendship getFriendshipWithUser(User friend) throws EntityNotFound {
-        List<Friendship> friendships = getAllFriendships();
+        List<Friendship> friendships = getAllFriendshipsIncludingPending();
         for (Friendship friendship : friendships) {
             if (friendship.getReceiver() == friend || friendship.getRequester() == friend) {
                 return friendship;
@@ -85,12 +124,6 @@ public class FriendshipService {
         }
 
         throw new EntityNotFound(USER_NOT_FRIEND_ERROR);
-    }
-
-    public List<Friendship> getPendingFriendships() {
-        List<Friendship> friendships = getAllFriendships();
-        friendships.removeIf(e -> e.approved);
-        return friendships;
     }
 
     public void removeFriendship(String username) throws EntityNotFound {
@@ -106,7 +139,7 @@ public class FriendshipService {
 
         ArrayList<SearchResultDTO> results = new ArrayList<SearchResultDTO>();
         for (User user : users) {
-            results.add(new SearchResultDTO(user.getUsername(), getRelation(user)));
+            results.add(new SearchResultDTO(user.getUsername(), getSpecificRelationship(user)));
         }
 
         return results;
@@ -124,7 +157,7 @@ public class FriendshipService {
             throw new EntityNotFound("You have not received this request.");
         }
 
-        if (request.approved) {
+        if (request.isApproved()) {
             throw new IllogicalRequest("Request is already approved.");
         }
 
@@ -138,7 +171,7 @@ public class FriendshipService {
     }
 
     public void createRequest(String username) throws EntityNotFound, IllogicalRequest {
-
+        // TODO push to friend's notification stack
         User friend = userService.findByUsername(username);
         User user = userService.getCurrentUser();
 
@@ -150,9 +183,8 @@ public class FriendshipService {
             throw new IllogicalRequest("You cannot request yourself.");
         }
 
-        USER_RELATIONSHIP relation = getRelation(friend);
-        if (!relation.equals(USER_RELATIONSHIP.NO_RELATION)) {
-            throw new IllogicalRequest(relation.getMessage());
+        if (extractFriendUserObjects(getAllFriendshipsIncludingPending()).contains(friend)) {
+            throw new IllogicalRequest("friendship already exists or is pending.");
         }
 
         repo.save(new Friendship(user, friend));
@@ -167,7 +199,7 @@ public class FriendshipService {
 
         for (Friendship req : user.getRequestsMade()) {
             String username = req.getReceiver().getUsername();
-            if (req.approved) {
+            if (req.isApproved()) {
                 friends.add(username);
             } else {
                 reqMade.add(username);
@@ -177,7 +209,7 @@ public class FriendshipService {
 
         for (Friendship req : user.getRequestsReceived()) {
             String username = req.getRequester().getUsername();
-            if (req.approved) {
+            if (req.isApproved()) {
                 friends.add(username);
             } else {
                 reqReceived.add(username);

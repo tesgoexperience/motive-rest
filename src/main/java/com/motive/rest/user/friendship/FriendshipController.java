@@ -1,4 +1,4 @@
-package com.motive.rest.user.Friendship;
+package com.motive.rest.user.friendship;
 
 import java.util.List;
 
@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.motive.rest.exceptions.IllogicalRequest;
+import com.motive.rest.user.dto.SearchResultDTO;
+import com.motive.rest.user.dto.SocialSummaryDTO;
 import com.motive.rest.exceptions.EntityNotFound;
-import com.motive.rest.user.DTO.SearchResultDTO;
-import com.motive.rest.user.DTO.SocialSummaryDTO;
 
 import org.springframework.web.bind.annotation.GetMapping;
 

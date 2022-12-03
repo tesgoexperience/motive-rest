@@ -1,9 +1,12 @@
-package com.motive.rest.user.DTO;
+package com.motive.rest.user.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import com.motive.rest.dto.DTO;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
@@ -13,7 +16,7 @@ import lombok.EqualsAndHashCode;
 @ToString
 @EqualsAndHashCode
 @AllArgsConstructor
-public class SearchResultDTO {
+public class SearchResultDTO implements DTO {
     public enum USER_RELATIONSHIP {
 
         NO_RELATION {

@@ -1,11 +1,10 @@
-package com.motive.rest.user.Friendship;
+package com.motive.rest.user.friendship;
 
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import com.motive.rest.user.User;
 
@@ -13,16 +12,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.EqualsAndHashCode;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 @NoArgsConstructor
 @Getter
@@ -43,7 +38,7 @@ public class Friendship {
     @JoinColumn(name="receiver_id", nullable=false)
     private User receiver;
 
-    boolean approved;
+    private boolean approved;
 
     public Friendship(User requester, User friend) {
         this.receiver = friend;
@@ -51,7 +46,7 @@ public class Friendship {
         approved = false;
     }
 
-    @Override 
+    @Override
     public int hashCode(){
         HashCodeBuilder hcb = new HashCodeBuilder();
         hcb.append(new HashSet<User>(Arrays.asList(this.getReceiver(), this.getRequester())));
@@ -75,7 +70,7 @@ public class Friendship {
 
         Set<User> otherFriendshipSet = new HashSet<User>(Arrays.asList(otherFriendship.getReceiver(), otherFriendship.getRequester()));
         Set<User> friendshipSet = new HashSet<User>(Arrays.asList(this.getReceiver(), this.getRequester()));
-    
+
         return otherFriendshipSet.equals(friendshipSet);
 
     }
