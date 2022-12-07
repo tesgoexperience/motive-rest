@@ -40,7 +40,13 @@ public class AttendanceController {
     }
 
 
-    @PostMapping(value = "/respond")
+    @PostMapping(value = "/accept") //todo
+    @ResponseBody
+    public void respondToAttendanceRequest(@RequestBody ResponseDto req){
+        service.respondToAttendanceRequest(req);
+    }
+
+    @PostMapping(value = "/deny")//todo
     @ResponseBody
     public void respondToAttendanceRequest(@RequestBody ResponseDto req){
         service.respondToAttendanceRequest(req);

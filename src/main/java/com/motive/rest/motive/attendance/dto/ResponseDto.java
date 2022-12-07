@@ -1,12 +1,11 @@
 package com.motive.rest.motive.attendance.dto;
 
-import com.motive.rest.motive.attendance.Attendance;
-
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
 public class ResponseDto {
-    boolean accept;
-    Long attendance;
+    String username;
+    Long motiveId; // TODO based on these two details we should be able to get the id. Update the tests. Rather than having to pass around and find the attendance id
+    Long attendance; //TODO should be changed to the motive id. We should be able to get the atte
 }
