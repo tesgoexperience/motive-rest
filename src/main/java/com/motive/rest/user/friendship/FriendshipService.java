@@ -55,6 +55,10 @@ public class FriendshipService {
 
     }
 
+    public void validateFriendship(String username) {
+        validateFriendship(userService.findByUsername(username));
+    }
+
     public void validateFriendship(User otherUser) {
         if (!isFriends(otherUser)) {
             throw new BadUserInput(USER_NOT_FRIEND_ERROR);

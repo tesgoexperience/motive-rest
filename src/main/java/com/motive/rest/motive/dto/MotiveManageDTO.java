@@ -12,8 +12,6 @@ import com.motive.rest.user.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
-import lombok.AllArgsConstructor;
 
 @NoArgsConstructor
 public class MotiveManageDTO implements DTO {

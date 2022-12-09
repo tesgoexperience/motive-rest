@@ -3,8 +3,6 @@ package com.motive.rest.motive.attendance;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +15,7 @@ import com.motive.rest.motive.Motive;
 import com.motive.rest.motive.MotiveService;
 import com.motive.rest.motive.attendance.Attendance.ATTENDANCE_STATUS;
 import com.motive.rest.motive.attendance.dto.AttendanceDTO;
-import com.motive.rest.motive.attendance.dto.ResponseDto;
+import com.motive.rest.motive.attendance.dto.AttendanceResponseDto;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 import com.motive.rest.user.friendship.FriendshipService;
@@ -40,9 +38,7 @@ public class AttendanceService {
         Motive motive = motiveService.getMotive(motiveId);
 
         // Ensure this user is friends with motive owner before attempting
-        if (!friendshipService.isFriends(motive.getOwner())) {
-            throw new IllogicalRequest("User is not friends with motive owner");
-        }
+        friendshipService.validateFriendship(motive.getOwner());
 
         if (hasAttendance(user, motive)) {
             throw new IllogicalRequest("Attendance already registered");
@@ -52,8 +48,13 @@ public class AttendanceService {
         repo.save(attendance);
     }
 
-    public void respondToAttendanceRequest(ResponseDto response) {
-        Optional<Attendance> optionalAttendance = repo.findById(response.getAttendance());
+    public void respondToAttendanceRequest(AttendanceResponseDto response, boolean accept) {
+        User friend = userService.findByUsername(response.getAttendeeUsername());
+
+        friendshipService.validateFriendship(friend);
+
+        Optional<Attendance> optionalAttendance = repo
+                .findByMotiveAndUser(motiveService.getMotive(response.getMotiveId()), friend);
 
         if (!optionalAttendance.isPresent()) {
             throw new EntityNotFound("Attendance not found");
@@ -70,7 +71,7 @@ public class AttendanceService {
             throw new IllogicalRequest("Attendance already confirmed");
         }
 
-        if (response.isAccept()) {
+        if (accept) {
             attendance.setStatus(ATTENDANCE_STATUS.CONFIRMED);
             repo.save(attendance);
         } else {
@@ -92,4 +93,16 @@ public class AttendanceService {
     private boolean hasAttendance(User user, Motive motive) {
         return repo.findByMotiveAndUser(motive, user).isPresent();
     }
+
+    public AttendanceDTO motiveAttendance(Long motiveId) {
+        User user = userService.getCurrentUser();
+        Optional<Attendance> att = repo.findByMotiveAndUser(motiveService.getMotive(motiveId), user);
+        if (att.isPresent()) {
+            return (AttendanceDTO) dtoFactory.getDto(
+                    att.get(),
+                    DTO_TYPE.ATTENDANCE);
+        }
+        return null;
+    }
+
 }

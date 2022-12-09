@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class MotiveService {
-    private static final String CAN_NOT_HIDE_FROM_NON_FRIEND_USER = "User tried to hide motive from a user who they are not friends";
+
     @Autowired
     DTOFactory dtoFactory;
 
@@ -59,8 +59,7 @@ public class MotiveService {
                 start);
 
         for (String username : hiddenFrom) {
-            Friendship friendship = friendshipService.getFriendshipWithUser(username);
-
+            friendshipService.validateFriendship(username);
             motive.getHiddenFrom().add(userService.findByUsername(username));
         }
 
