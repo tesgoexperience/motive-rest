@@ -56,4 +56,10 @@ public class AttendanceController {
         service.respondToAttendanceRequest(req,false);
     }
 
+    @PostMapping(value = "/cancel")
+    @ResponseBody
+    public void cancelAttendance(@RequestBody Long motiveId){
+        service.cancelAttendance(Long.valueOf(motiveId));
+    }
+
 }

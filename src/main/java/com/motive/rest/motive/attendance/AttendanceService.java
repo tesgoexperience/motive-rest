@@ -33,6 +33,17 @@ public class AttendanceService {
     @Autowired
     FriendshipService friendshipService;
 
+    public void cancelAttendance(Long motiveId) {
+        User user = userService.getCurrentUser();
+        Motive motive = motiveService.getMotive(motiveId);
+
+        if (!hasAttendance(user, motive)) {
+            throw new IllogicalRequest("You are not attending this motive.");
+        }
+
+        repo.delete(findByMotiveAndUser(motiveId).get());
+    }
+
     public void requestAttendance(Long motiveId, boolean anonymous) {
         User user = userService.getCurrentUser();
         Motive motive = motiveService.getMotive(motiveId);
@@ -94,9 +105,11 @@ public class AttendanceService {
         return repo.findByMotiveAndUser(motive, user).isPresent();
     }
 
+    public Optional<Attendance> findByMotiveAndUser(Long motiveId){
+        return repo.findByMotiveAndUser(motiveService.getMotive(motiveId), userService.getCurrentUser());
+    }
     public AttendanceDTO motiveAttendance(Long motiveId) {
-        User user = userService.getCurrentUser();
-        Optional<Attendance> att = repo.findByMotiveAndUser(motiveService.getMotive(motiveId), user);
+        Optional<Attendance> att = findByMotiveAndUser(motiveId);
         if (att.isPresent()) {
             return (AttendanceDTO) dtoFactory.getDto(
                     att.get(),
@@ -104,5 +117,7 @@ public class AttendanceService {
         }
         return null;
     }
+
+
 
 }
