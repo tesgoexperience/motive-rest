@@ -1,17 +1,16 @@
 package com.motive.rest.motive;
 
-import com.jayway.jsonpath.Option;
 import com.motive.rest.dto.DTOFactory;
 import com.motive.rest.dto.DTOFactory.DTO_TYPE;
 import com.motive.rest.exceptions.EntityNotFound;
-import com.motive.rest.exceptions.IllogicalRequest;
 import com.motive.rest.motive.attendance.Attendance;
+import com.motive.rest.motive.attendance.AttendanceRepo;
+import com.motive.rest.motive.attendance.dto.StatsDTO;
 import com.motive.rest.motive.dto.MotiveBrowseDTO;
 import com.motive.rest.motive.dto.MotiveManageDTO;
 import com.motive.rest.notification.NotificationService;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
-import com.motive.rest.user.friendship.Friendship;
 import com.motive.rest.user.friendship.FriendshipService;
 
 import org.springframework.stereotype.Service;
@@ -33,6 +32,9 @@ public class MotiveService {
     MotiveRepo repo;
 
     @Autowired
+    private AttendanceRepo attendanceRepo;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
@@ -43,10 +45,11 @@ public class MotiveService {
 
     /**
      * Creates a motive and notifies this users friends
+     * 
      * @param title
      * @param description
      * @param start
-     * @param hiddenFrom is the list of friends that shouldn't see this motive
+     * @param hiddenFrom  is the list of friends that shouldn't see this motive
      * @return a manageDTO generated from the created motive
      */
     public MotiveManageDTO createMotive(String title, String description, Date start, String[] hiddenFrom) {
@@ -70,13 +73,15 @@ public class MotiveService {
             notificationService.notify(invited, user.getUsername() + " has started a new motive", true);
         }
 
-        MotiveManageDTO motiveDto = (MotiveManageDTO)dtoFactory.getDto(motive, DTO_TYPE.MOTIVE_MANAGE);
+        MotiveManageDTO motiveDto = (MotiveManageDTO) dtoFactory.getDto(motive, DTO_TYPE.MOTIVE_MANAGE);
 
         return motiveDto;
     }
 
     /**
-     * Get the list of friends who are not in the hidden from list, have no rejected, pending or confirmed attendances
+     * Get the list of friends who are not in the hidden from list, have no
+     * rejected, pending or confirmed attendances
+     * 
      * @param motive
      * @return the remaining friends after subtraction
      */
@@ -113,6 +118,25 @@ public class MotiveService {
     }
 
     @SuppressWarnings("unchecked")
+    public List<MotiveBrowseDTO> getAttending() {
+        User user = userService.getCurrentUser();
+
+        List<Motive> motives = new ArrayList<Motive>();
+        for (Motive motive : getActiveMotives()) {
+            if (motive.getOwner().equals(user)) {
+                motives.add(motive);
+                continue;
+            }
+
+            if (attendanceRepo.findByMotiveAndUser(motive, user).isPresent()) {
+                motives.add(motive);
+                continue;
+            }
+        }
+        return (List<MotiveBrowseDTO>) dtoFactory.getDto(motives, DTO_TYPE.MOTIVE_BROWSE);
+    }
+
+    @SuppressWarnings("unchecked")
     public List<MotiveManageDTO> manageMotives() {
         return (List<MotiveManageDTO>) dtoFactory.getDto(repo.findByOwner(userService.getCurrentUser()),
                 DTO_TYPE.MOTIVE_MANAGE);
@@ -126,5 +150,8 @@ public class MotiveService {
         return motives;
     }
 
+    public StatsDTO getStats() {
+        return new StatsDTO(getAttending().size(),0,getActiveMotives().size());
+    }
 
 }
