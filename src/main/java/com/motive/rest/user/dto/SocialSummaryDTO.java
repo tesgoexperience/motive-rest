@@ -17,6 +17,6 @@ import lombok.ToString;
 @ToString
 public class SocialSummaryDTO implements DTO{
     List<String> friends;
-    List<String> requestsForUser;
-    List<String> requestsByUser;
+    List<String> requestsSent;
+    List<String> requestsRecieved;
 }
