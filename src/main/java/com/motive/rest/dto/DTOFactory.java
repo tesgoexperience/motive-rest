@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.motive.rest.motive.attendance.dto.AttendanceDTO;
 import com.motive.rest.motive.dto.MotiveBrowseDTO;
 import com.motive.rest.motive.dto.MotiveManageDTO;
+import com.motive.rest.user.dto.UserDto;
 
 // Takes in an object or List and returns the DTO requested if it is available
 @Component
@@ -18,6 +19,7 @@ public class DTOFactory {
         MOTIVE_BROWSE,
         MOTIVE_MANAGE,
         ATTENDANCE,
+        USER
     }
 
     @Autowired
@@ -31,6 +33,8 @@ public class DTOFactory {
                 return modelMapper.map(entity, MotiveManageDTO.class);
             case ATTENDANCE:
                 return modelMapper.map(entity, AttendanceDTO.class);
+            case USER:
+                return modelMapper.map(entity, UserDto.class);
         }
         return null;
     }
