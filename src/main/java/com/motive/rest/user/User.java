@@ -20,9 +20,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 
 @Entity
 @NoArgsConstructor
@@ -56,17 +62,14 @@ public class User {
 
     private boolean verified;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "requester", fetch = FetchType.LAZY)
-    private List<Friendship> requestsMade;
-
-    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY)
-    private List<Friendship> requestsReceived;
+    @ElementCollection
+    Set<User> hideStatusFrom;
 
     public User(String email, String password) {
         this.email = email;
         verified = false;
         this.password = password;
+        hideStatusFrom = new HashSet<>();
     }
 
     @JsonProperty
