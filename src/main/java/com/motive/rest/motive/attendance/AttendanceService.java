@@ -13,6 +13,7 @@ import com.motive.rest.exceptions.IllogicalRequest;
 import com.motive.rest.exceptions.UnauthorizedRequest;
 import com.motive.rest.motive.Motive;
 import com.motive.rest.motive.MotiveService;
+import com.motive.rest.motive.Invite.Invite;
 import com.motive.rest.motive.attendance.Attendance.ATTENDANCE_STATUS;
 import com.motive.rest.motive.attendance.dto.AttendanceDTO;
 import com.motive.rest.motive.attendance.dto.AttendanceResponseDto;
@@ -48,8 +49,28 @@ public class AttendanceService {
         User user = userService.getCurrentUser();
         Motive motive = motiveService.getMotive(motiveId);
 
-        // Ensure this user is friends with motive owner before attempting
-        friendshipService.validateFriendship(motive.getOwner());
+        if (user.equals(motive.getOwner())) {
+            throw new IllogicalRequest("You cannot request your own event.");
+        }
+
+        if (!motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.EVERYONE)) {
+            // Ensure this user is friends with motive owner before attempting
+            friendshipService.validateFriendship(motive.getOwner());
+
+            if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.SPECIFIC_FRIENDS)) {
+                boolean isInvited = false;
+                for (Invite invite : motive.getSpecificallyInvited()) {
+                    if (invite.getUser().equals(user)) {
+                        isInvited = true;
+                        break;
+                    }
+                }
+
+                if (!isInvited) {
+                    throw new UnauthorizedRequest("You must be invited to this event.");
+                }
+            }
+        }
 
         if (hasAttendance(user, motive)) {
             throw new IllogicalRequest("Attendance already registered");
@@ -90,8 +111,10 @@ public class AttendanceService {
         }
     }
 
-    public List<AttendanceDTO> getPendingAttendance(Long motive) {
-        return getPendingAttendance(motiveService.getMotive(motive));
+    public List<AttendanceDTO> getPendingAttendance(Long motiveId) {
+        Motive motive = motiveService.getMotive(motiveId);
+        motiveService.validateOwner(motive);
+        return getPendingAttendance(motive);
     }
 
     @SuppressWarnings("unchecked")
@@ -105,9 +128,10 @@ public class AttendanceService {
         return repo.findByMotiveAndUser(motive, user).isPresent();
     }
 
-    public Optional<Attendance> findByMotiveAndUser(Long motiveId){
+    public Optional<Attendance> findByMotiveAndUser(Long motiveId) {
         return repo.findByMotiveAndUser(motiveService.getMotive(motiveId), userService.getCurrentUser());
     }
+
     public AttendanceDTO motiveAttendance(Long motiveId) {
         Optional<Attendance> att = findByMotiveAndUser(motiveId);
         if (att.isPresent()) {
@@ -117,7 +141,5 @@ public class AttendanceService {
         }
         return null;
     }
-
-
 
 }

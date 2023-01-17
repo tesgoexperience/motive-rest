@@ -3,6 +3,8 @@ package com.motive.rest.motive;
 import com.motive.rest.dto.DTOFactory;
 import com.motive.rest.dto.DTOFactory.DTO_TYPE;
 import com.motive.rest.exceptions.EntityNotFound;
+import com.motive.rest.exceptions.UnauthorizedRequest;
+import com.motive.rest.motive.Invite.Invite;
 import com.motive.rest.motive.attendance.Attendance;
 import com.motive.rest.motive.attendance.AttendanceRepo;
 import com.motive.rest.motive.attendance.dto.StatsDTO;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -52,18 +55,22 @@ public class MotiveService {
      * @param hiddenFrom  is the list of friends that shouldn't see this motive
      * @return a manageDTO generated from the created motive
      */
-    public MotiveManageDTO createMotive(String title, String description, Date start, String[] hiddenFrom) {
+    public MotiveManageDTO createMotive(String title, String description, Date start, Motive.ATTENDANCE_TYPE type,
+            String[] specificallyInvited) {
         User user = userService.getCurrentUser();
 
         Motive motive = new Motive(
                 user,
                 title,
                 description,
-                start);
+                start,
+                type);
 
-        for (String username : hiddenFrom) {
-            friendshipService.validateFriendship(username);
-            motive.getHiddenFrom().add(userService.findByUsername(username));
+        if (type.equals(Motive.ATTENDANCE_TYPE.SPECIFIC_FRIENDS)) {
+            for (String username : specificallyInvited) {
+                friendshipService.validateFriendship(username);
+                motive.getSpecificallyInvited().add(new Invite(motive, userService.findByUsername(username)));
+            }
         }
 
         repo.save(motive);
@@ -86,10 +93,15 @@ public class MotiveService {
      * @return the remaining friends after subtraction
      */
     public List<User> getPotentialAttendees(Motive motive) {
-        // returns friends - (hiddenFrom + pending Attendance + confirmed attendance)
         List<User> allFriends = new ArrayList<>();
-        for (User friend : friendshipService.getApprovedFriendshipsUserObjects()) {
-            allFriends.add(friend);
+
+        if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.SPECIFIC_FRIENDS)) {
+            allFriends.addAll(
+                    motive.getSpecificallyInvited().stream().map(e -> e.getUser()).collect(Collectors.toList()));
+        } else if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.FRIENDS)) {
+            for (User friend : friendshipService.getFriends()) {
+                allFriends.add(friend);
+            }
         }
 
         // remove all the friends that already have an attendance status
@@ -97,42 +109,34 @@ public class MotiveService {
             allFriends.remove(attendance.getUser());
         }
 
-        // remove all the users who the motive is hidden from
-        allFriends.removeAll(motive.getHiddenFrom());
-
         return allFriends;
     }
 
     public Motive getMotive(Long id) {
         Optional<Motive> motive = repo.findById(id);
         if (!motive.isPresent()) {
-            throw new EntityNotFound("Could not find motive using id");
+            throw new EntityNotFound("Could not find motive");
         }
-
         return motive.get();
     }
 
     @SuppressWarnings("unchecked")
     public List<MotiveBrowseDTO> browseMotives() {
-        return (List<MotiveBrowseDTO>) dtoFactory.getDto(getActiveMotives(), DTO_TYPE.MOTIVE_BROWSE);
+        User user = userService.getCurrentUser();
+        // don't include the motives the user owns in the list
+        List<Motive> motives = getActiveMotives().stream().filter(m -> !m.getOwner().equals(user))
+                .collect(Collectors.toList());
+
+        return (List<MotiveBrowseDTO>) dtoFactory.getDto(motives, DTO_TYPE.MOTIVE_BROWSE);
     }
 
     @SuppressWarnings("unchecked")
     public List<MotiveBrowseDTO> getAttending() {
         User user = userService.getCurrentUser();
 
-        List<Motive> motives = new ArrayList<Motive>();
-        for (Motive motive : getActiveMotives()) {
-            if (motive.getOwner().equals(user)) {
-                motives.add(motive);
-                continue;
-            }
-
-            if (attendanceRepo.findByMotiveAndUser(motive, user).isPresent()) {
-                motives.add(motive);
-                continue;
-            }
-        }
+        List<Motive> motives = getActiveMotives().stream().filter(m -> attendanceRepo.findByMotiveAndUser(m, user).isPresent())
+                .collect(Collectors.toList());
+                
         return (List<MotiveBrowseDTO>) dtoFactory.getDto(motives, DTO_TYPE.MOTIVE_BROWSE);
     }
 
@@ -142,16 +146,57 @@ public class MotiveService {
                 DTO_TYPE.MOTIVE_MANAGE);
     }
 
+    /**
+     * 1. Gets all motives this user can potentially attend
+     * 2. First is all the motives the user owns
+     * 3. Sorts remaining motives based of friends attending
+     * TODO 3. order motives with no friends attending based distance, uni...
+     */
     private List<Motive> getActiveMotives() {
-        List<Motive> motives = new ArrayList<>();
-        for (User friend : friendshipService.getApprovedFriendshipsUserObjects()) {
-            motives.addAll(repo.findByOwnerAndFinished(friend, false));
+
+        List<Motive> potentialMotive = new ArrayList<>();
+        List<Motive> AllMotives = repo.findByFinished(false);
+        for (Motive motive : AllMotives) {
+            if (canAttend(motive)) {
+                potentialMotive.add(motive);
+            }
         }
-        return motives;
+
+        return potentialMotive;
+    }
+
+    /**
+     * 
+     * @param motive
+     * @return whether or not this user can attend this motive
+     */
+    private boolean canAttend(Motive motive) {
+        if (motive.getOwner().equals(userService.getCurrentUser())
+                || motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.EVERYONE)) {
+            return true;
+        }
+
+        if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.SPECIFIC_FRIENDS)) {
+            return motive.getSpecificallyInvited().stream().map(e -> e.getUser()).collect(Collectors.toList())
+                    .contains(userService.getCurrentUser());
+        }
+
+        if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.FRIENDS)) {
+            return friendshipService.isFriends(motive.getOwner());
+        }
+
+        return false;
     }
 
     public StatsDTO getStats() {
-        return new StatsDTO(getAttending().size(),0,getActiveMotives().size());
+        return new StatsDTO(getAttending().size()+manageMotives().size(), 0, getActiveMotives().size());
+    }
+
+    public void validateOwner(Motive motive) {
+        if (!motive.getOwner().equals(userService.getCurrentUser())) {
+            throw new UnauthorizedRequest("Forbidden from this action.");
+        }
+        ;
     }
 
 }

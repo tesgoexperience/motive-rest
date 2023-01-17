@@ -52,10 +52,20 @@ public class MotiveController {
     }
 
     @PostMapping(value = "/create")
-    @ResponseBody
+    @ResponseBody //todo use manageDto rather than createMotiveDto here to make reduce repition for updates
     public ResponseEntity<MotiveManageDTO> createMotive(@RequestBody CreateMotiveDTO motive) {
-        MotiveManageDTO dto = service.createMotive(motive.getTitle(), motive.getDescription(), motive.getStart(),
-                motive.getHiddenFrom());
+        MotiveManageDTO dto = service.createMotive(motive.getTitle(), motive.getDescription(), motive.getStart(), motive.getAttendanceType(),
+                motive.getSpecificallyInvited());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
+
+
+
+    // @PostMapping(value = "/update")
+    // @ResponseBody
+    // public ResponseEntity<MotiveManageDTO> createMotive(@RequestBody MotiveManageDTO motive) {
+    //     MotiveManageDTO dto = service.createMotive(motive.getTitle(), motive.getDescription(), motive.getStart(), motive.getAttendanceType(),
+    //             motive.getSpecificallyInvited());
+    //     return new ResponseEntity<>(dto, HttpStatus.OK);
+    // }
 }

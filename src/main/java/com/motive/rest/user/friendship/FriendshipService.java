@@ -96,7 +96,7 @@ public class FriendshipService {
         }
     }
 
-    private boolean isFriends(User otherUser) {
+    public boolean isFriends(User otherUser) {
         return getFriends().contains(otherUser);
     }
 

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.motive.rest.dto.DTO;
+import com.motive.rest.motive.Invite.Invite;
 import com.motive.rest.motive.attendance.Attendance;
 import com.motive.rest.motive.attendance.Attendance.ATTENDANCE_STATUS;
 import com.motive.rest.user.User;
@@ -24,7 +25,7 @@ public class MotiveManageDTO implements DTO {
     @Getter @Setter private boolean finished;
 
     @Setter  private User owner;
-    @Setter  private List<User> hiddenFrom;
+    @Setter  private List<Invite> specificallyInvited;
     @Setter  private List<Attendance> attendance;
 
     public String getOwnerUsername(){
@@ -64,11 +65,11 @@ public class MotiveManageDTO implements DTO {
     }
 
 
-    public List<String> getHiddenFrom(){
+    public List<String> getSpecificallyInvited(){
         List<String> users = new ArrayList<>();
 
-        for (User user : hiddenFrom) {
-            users.add(user.getUsername());
+        for (Invite invite : specificallyInvited) {
+            users.add(invite.getUser().getUsername());
         }
 
         return users;
