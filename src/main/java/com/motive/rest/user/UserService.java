@@ -40,7 +40,6 @@ public class UserService {
     public static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
     public String login(String email, String password) {
-
         User user = repo.findByEmail(email);
         if (user != null && PASSWORD_ENCODER.matches(password, user.getPassword())) {
             // generate a toke

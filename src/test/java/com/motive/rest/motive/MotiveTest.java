@@ -171,4 +171,8 @@ public class MotiveTest {
 
     }
 
+    //TODO test relation with motive
+    
+    //TODO if a user tries to request their own motive it returns "User is not friends with motive owner"
+
 }

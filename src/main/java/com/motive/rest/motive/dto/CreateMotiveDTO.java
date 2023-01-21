@@ -1,10 +1,8 @@
 package com.motive.rest.motive.dto;
 
 import java.util.Date;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.motive.rest.dto.DTO;
+import com.motive.rest.motive.Motive.ATTENDANCE_TYPE;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +15,7 @@ public class CreateMotiveDTO implements DTO {
     private String title;
     private String description;
     private Date start;
-    private String[] hiddenFrom;
+    private ATTENDANCE_TYPE attendanceType;
+    private String[] specificallyInvited;
 
 }

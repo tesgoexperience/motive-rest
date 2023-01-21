@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.motive.rest.motive.attendance.dto.StatsDTO;
 import com.motive.rest.motive.dto.CreateMotiveDTO;
 import com.motive.rest.motive.dto.MotiveBrowseDTO;
 import com.motive.rest.motive.dto.MotiveManageDTO;
@@ -26,10 +27,22 @@ public class MotiveController {
     @Autowired
     MotiveService service;
 
-    @GetMapping(value = "/")
+    @GetMapping(value = "/all")
     @ResponseBody
     public List<MotiveBrowseDTO> browseMotives() {
         return service.browseMotives();
+    }
+
+    @GetMapping(value = "/attending")
+    @ResponseBody
+    public List<MotiveBrowseDTO> attending() {
+        return service.getAttending();
+    }
+
+    @GetMapping(value = "/stats")
+    @ResponseBody
+    public StatsDTO stats() {
+        return service.getStats();
     }
 
     @GetMapping(value = "/managing")
@@ -39,10 +52,20 @@ public class MotiveController {
     }
 
     @PostMapping(value = "/create")
-    @ResponseBody
+    @ResponseBody //todo use manageDto rather than createMotiveDto here to make reduce repition for updates
     public ResponseEntity<MotiveManageDTO> createMotive(@RequestBody CreateMotiveDTO motive) {
-        MotiveManageDTO dto = service.createMotive(motive.getTitle(), motive.getDescription(), motive.getStart(),
-                motive.getHiddenFrom());
+        MotiveManageDTO dto = service.createMotive(motive.getTitle(), motive.getDescription(), motive.getStart(), motive.getAttendanceType(),
+                motive.getSpecificallyInvited());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
+
+
+
+    // @PostMapping(value = "/update")
+    // @ResponseBody
+    // public ResponseEntity<MotiveManageDTO> createMotive(@RequestBody MotiveManageDTO motive) {
+    //     MotiveManageDTO dto = service.createMotive(motive.getTitle(), motive.getDescription(), motive.getStart(), motive.getAttendanceType(),
+    //             motive.getSpecificallyInvited());
+    //     return new ResponseEntity<>(dto, HttpStatus.OK);
+    // }
 }

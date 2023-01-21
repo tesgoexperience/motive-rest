@@ -1,7 +1,5 @@
 package com.motive.rest.user.dto;
 
-import java.util.List;
-
 import com.motive.rest.dto.DTO;
 
 import lombok.AllArgsConstructor;
@@ -11,12 +9,11 @@ import lombok.Setter;
 import lombok.ToString;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
 @ToString
-public class SocialSummaryDTO implements DTO{
-    List<String> friends;
-    List<String> requestsSent;
-    List<String> requestsReceived;
+@AllArgsConstructor
+public class UserDto implements DTO{
+    private String email;
+    private String username;
 }

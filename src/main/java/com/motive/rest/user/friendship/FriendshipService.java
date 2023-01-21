@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.motive.rest.exceptions.IllogicalRequest;
 import com.motive.rest.exceptions.BadUserInput;
@@ -28,99 +30,82 @@ public class FriendshipService {
     @Autowired
     private FriendRepo repo;
 
-    // Only use get the specific friendship status. Do not use to find out if users
-    // are friends
-    public USER_RELATIONSHIP getSpecificRelationship(User otherUser) {
-        User user = userService.getCurrentUser();
-
-        for (Friendship req : user.getRequestsMade()) {
-            if (req.getReceiver().equals(otherUser)) {
-                if (req.isApproved()) {
-                    return USER_RELATIONSHIP.FRIEND;
-                }
-                return USER_RELATIONSHIP.REQUESTED_BY_YOU;
-            }
-        }
-
-        for (Friendship req : user.getRequestsReceived()) {
-            if (req.getRequester().equals(otherUser)) {
-                if (req.isApproved()) {
-                    return USER_RELATIONSHIP.FRIEND;
-                }
-                return USER_RELATIONSHIP.REQUESTED_BY_THEM;
-            }
-        }
-
-        return USER_RELATIONSHIP.NO_RELATION;
-
+    /**
+     * Will find all users this user has an approved friendship with.
+     * @return the list of users this user has resoved frienships requests with
+     * 
+     */
+    public List<User> getFriends(){
+       return extractFriends(repo.findApprovedRequests(userService.getCurrentUser().getId())); 
+    }
+    
+    /**
+     * Get the friendship requests this user has recieved
+     * @param includeApproved if false, will return only pending requests recieved. If true, it will returns pending and approved requests.
+     * @return the users this user has recieved requests from
+     */
+    public List<User> getRequestsRecieved(boolean includeApproved){
+        return extractFriends(repo.findRequestsRecieved(userService.getCurrentUser().getId(), includeApproved));
     }
 
+    /**
+     * Get the friendship requests this user has sent
+     * @param includeApproved if false, will return only pending requests sent. If true, it will returns pending and approved requests.
+     * @return the users this user has sent requests 
+     */
+    public List<User> getRequestsSent(boolean includeApproved){
+        return extractFriends(repo.findRequestsSent(userService.getCurrentUser().getId(), includeApproved));
+    }
+
+
+    /**
+     * Friendships consist of a receiver and sender. Either one could be this user and this method will extract the other friend
+     * @params friendships the list of freindships which need the friend to extracted from
+     * @return the list of friends extracted from the friendship objects
+     */
+    private List<User> extractFriends(List<Friendship> friendships){
+        List<User> friends = new ArrayList<>();
+        for (Friendship friendship : friendships) {
+            if (friendship.getSender().equals(userService.getCurrentUser())) {
+                friends.add(friendship.getReceiver());
+            } else {
+                friends.add(friendship.getSender());
+            }
+        }
+
+        return friends;
+    }
+
+    /**
+     * if the context user is not friends with this user, throw an error
+     * @param username of the friend we are checking against
+     * @throws BadUserInput
+     */
+    public void validateFriendship(String username) {
+        validateFriendship(userService.findByUsername(username));
+    }
+
+    /**
+     * if the context user is not friends with this user, throw an error
+     * @param otherUser the friend we are checking against
+     * @throws BadUserInput
+     */
     public void validateFriendship(User otherUser) {
         if (!isFriends(otherUser)) {
             throw new BadUserInput(USER_NOT_FRIEND_ERROR);
         }
     }
 
-    public List<User> getApprovedFriendshipsUserObjects() {
-       return extractFriendUserObjects(getApprovedFriendships());
-    }
-
-    // returns all the other users who in the friendship with the context user
-    private List<User> extractFriendUserObjects(List<Friendship> friendships){
-        List<User> friends = new ArrayList<>();
-        for (Friendship friendship : friendships) {
-            if (friendship.getRequester().equals(userService.getCurrentUser())) {
-                friends.add(friendship.getReceiver());
-            } else {
-                friends.add(friendship.getRequester());
-            }
-        }
-        return friends;
-    }
     public boolean isFriends(User otherUser) {
-        return getApprovedFriendshipsUserObjects().contains(otherUser);
-    }
-
-    public List<Friendship> getApprovedFriendships() {
-        return getFriendships(false, true);
-    }
-
-    public Friendship getFriendshipWithUser(String username) throws EntityNotFound {
-        return getFriendshipWithUser(userService.findByUsername(username));
-    }
-
-    private List<Friendship> getFriendships(boolean includePending, boolean includeApproved) {
-
-        User user = userService.getCurrentUser();
-        List<Friendship> friendships = user.getRequestsMade();
-        friendships.addAll(user.getRequestsReceived());
-
-        if (!includePending) {
-            friendships.removeIf(e -> !e.isApproved());
-        }
-
-        if (!includeApproved) {
-            friendships.removeIf(Friendship::isApproved);
-        }
-
-        return friendships;
-    }
-
-    // NOTE includes pending friendships
-    public List<Friendship> getAllFriendshipsIncludingPending() {
-        return getFriendships(true, true);
-    }
-
-    public List<Friendship> getPendingFriendships() {
-        return getFriendships(true, false);
+        return getFriends().contains(otherUser);
     }
 
     public Friendship getFriendshipWithUser(User friend) throws EntityNotFound {
-        List<Friendship> friendships = getAllFriendshipsIncludingPending();
-        for (Friendship friendship : friendships) {
-            if (friendship.getReceiver() == friend || friendship.getRequester() == friend) {
-                return friendship;
-            }
+        Optional<Friendship> friendship = repo.findFriendship(userService.getCurrentUser().getId(), friend.getId());
+       
+        if(friendship.isPresent())
+        {
+            return friendship.get();
         }
 
         throw new EntityNotFound(USER_NOT_FRIEND_ERROR);
@@ -132,17 +117,6 @@ public class FriendshipService {
 
         Friendship friendship = getFriendshipWithUser(friend);
         repo.delete(friendship);
-    }
-
-    public List<SearchResultDTO> searchUsers(String search) {
-        List<User> users = userService.findByUsernameContaining(search);
-
-        ArrayList<SearchResultDTO> results = new ArrayList<SearchResultDTO>();
-        for (User user : users) {
-            results.add(new SearchResultDTO(user.getUsername(), getSpecificRelationship(user)));
-        }
-
-        return results;
     }
 
     public void respondToRequest(String username, boolean accept) throws IllogicalRequest, EntityNotFound {
@@ -182,42 +156,49 @@ public class FriendshipService {
         if (friend.equals(user)) {
             throw new IllogicalRequest("You cannot request yourself.");
         }
-
-        if (extractFriendUserObjects(getAllFriendshipsIncludingPending()).contains(friend)) {
+        
+        if (getFriends().contains(user) || getRequestsRecieved(false).contains(user) || getRequestsSent(false).contains(user)) {
             throw new IllogicalRequest("friendship already exists or is pending.");
         }
 
         repo.save(new Friendship(user, friend));
     }
 
+    private USER_RELATIONSHIP getSpecificRelationship(User otherUser) {
+
+        if (getFriends().contains(otherUser)) {
+            return USER_RELATIONSHIP.FRIEND;
+        }
+
+        if (getRequestsRecieved(false).contains(otherUser)) {
+             return USER_RELATIONSHIP.REQUESTED_BY_THEM;
+        }
+
+        if (getRequestsSent(false).contains(otherUser)) {
+            return USER_RELATIONSHIP.REQUESTED_BY_YOU;
+        }
+   
+        return USER_RELATIONSHIP.NO_RELATION;
+
+    }
+
+    public List<SearchResultDTO> searchUsers(String search) {
+        List<User> users = userService.findByUsernameContaining(search);
+
+        ArrayList<SearchResultDTO> results = new ArrayList<SearchResultDTO>();
+        for (User user : users) {
+            results.add(new SearchResultDTO(user.getUsername(), getSpecificRelationship(user)));
+        }
+
+        return results;
+    }
+
     public SocialSummaryDTO getSocialSummaryDTO() {
-        User user = userService.getCurrentUser();
+        List<String> reqMade = getRequestsSent(false).stream().map(e -> e.getUsername()).collect(Collectors.toList());
+        List<String> reqReceived = getRequestsRecieved(false).stream().map(e -> e.getUsername()).collect(Collectors.toList());
+        List<String> friends = getFriends().stream().map(e -> e.getUsername()).collect(Collectors.toList());
 
-        List<String> reqMade = new ArrayList<>();
-        List<String> reqReceived = new ArrayList<>();
-        List<String> friends = new ArrayList<>();
-
-        for (Friendship req : user.getRequestsMade()) {
-            String username = req.getReceiver().getUsername();
-            if (req.isApproved()) {
-                friends.add(username);
-            } else {
-                reqMade.add(username);
-
-            }
-        }
-
-        for (Friendship req : user.getRequestsReceived()) {
-            String username = req.getRequester().getUsername();
-            if (req.isApproved()) {
-                friends.add(username);
-            } else {
-                reqReceived.add(username);
-
-            }
-        }
-
-        return new SocialSummaryDTO(friends, reqReceived, reqMade);
+        return new SocialSummaryDTO(friends, reqMade,reqReceived);
     }
 
 }

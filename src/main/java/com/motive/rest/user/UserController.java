@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.motive.rest.dto.DTOFactory;
+import com.motive.rest.dto.DTOFactory.DTO_TYPE;
+import com.motive.rest.user.dto.UserDto;
+
 import org.springframework.web.bind.annotation.GetMapping;
 
 
@@ -23,12 +28,13 @@ public class UserController {
 
   @Autowired
   private UserService service;
-
+  @Autowired
+  DTOFactory dtoFactory;
   // return information about the authenticated user
   @GetMapping(value = "/", produces = "application/json")
   @ResponseBody
-  public String home() throws Exception {
-    return service.getCurrentUser().getUsername();
+  public UserDto home() throws Exception {
+    return (UserDto)dtoFactory.getDto(service.getCurrentUser(),DTO_TYPE.USER);
   }
 
   // Tokens have a 5 minute expiration. So we give the client the ability to
