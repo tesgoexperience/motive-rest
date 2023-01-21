@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.motive.rest.motive.status.dto.StatusBrowseDTO;
@@ -48,9 +49,9 @@ public class StatusController {
         return new ResponseEntity<Boolean>(service.showInterest(status, false), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/interest/") // returns a list of usernames of the people who are interested in this status
+    @GetMapping(value = "/interest/") // returns a list of usernames of the people who are interested in this status
     @ResponseBody
-    public List<String> createStatus(@RequestBody Long status) {
+    public List<String> getInterests(@RequestParam Long status) {
         return service.getInterests(status);
     }
 

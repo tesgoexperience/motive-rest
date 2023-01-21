@@ -34,7 +34,7 @@ public class AttendanceController {
 
     @GetMapping(value = "/pending")
     @ResponseBody
-    public List<AttendanceDTO> getAllPendingRequests(@RequestParam String motiveId){
+    public List<AttendanceDTO> getAllPendingRequests(@RequestParam String motiveId){ //todo move to body
         return service.getPendingAttendance(Long.valueOf(motiveId));
     }
 
