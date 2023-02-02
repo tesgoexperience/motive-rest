@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.motive.rest.exceptions.EntityNotFound;
-import com.motive.rest.security.CustomUserDetailsService;
+// import com.motive.rest.security.CustomUserDetailsService;
 
 import java.util.Date;
 
@@ -34,8 +34,7 @@ public class UserService {
     @Autowired
     UserRepo repo;
 
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
+
 
     public static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
@@ -50,7 +49,8 @@ public class UserService {
     }
 
     public User getCurrentUser() {
-        return userDetailsService.getCurrentUser();
+        // return userDetailsService.getCurrentUser();
+        return null;
     }
 
     public boolean validateUserInfo(User user) {

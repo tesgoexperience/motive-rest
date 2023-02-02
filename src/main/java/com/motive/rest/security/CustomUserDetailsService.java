@@ -1,4 +1,3 @@
-
 package com.motive.rest.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,18 +21,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Autowired
 	public CustomUserDetailsService(UserRepo repository) {
 		this.repository = repository;
-	}
-
-	public com.motive.rest.user.User getCurrentUser() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		return this.repository.findByEmail(authentication.getName());
-	}
-
-	public UserDetails getCurrentUserDetails(){
-		com.motive.rest.user.User current = getCurrentUser();
-		if (current!=null)
-			return loadUserByUsername(current.getEmail());
-		return null;
 	}
 
 	@Override
