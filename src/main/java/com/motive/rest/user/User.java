@@ -65,8 +65,10 @@ public class User {
     @ElementCollection
     Set<User> hideStatusFrom;
 
-    public User(String email, String password) {
+    
+    public User(String email, String password, String username) {
         this.email = email;
+        this.username = username;
         verified = false;
         this.password = password;
         hideStatusFrom = new HashSet<>();

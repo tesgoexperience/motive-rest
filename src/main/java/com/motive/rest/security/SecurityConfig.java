@@ -17,8 +17,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
@@ -51,8 +53,8 @@ public class SecurityConfig {
     @Value("${jwt.private-key}")
     private RSAPrivateKey rsaPrivateKey;
 
-    @Autowired
-    CustomUserDetailsService userDetailsService;
+    // @Autowired
+    // CustomUserDetailsService userDetailsService;
 
     /*
      * Take a http security object and customize it by adding jwt authentication
@@ -70,8 +72,7 @@ public class SecurityConfig {
                                 .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
                 .build();
     }
-
-    /*
+        /*
      * This was added via PR (thanks to @ch4mpy)
      * This will allow the /token endpoint to use basic auth and everything else
      * uses the SFC above
@@ -80,24 +81,17 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain tokenSecurityFilterChain(HttpSecurity http) throws Exception {
 
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-
-        return http
-                .requestMatcher(new AntPathRequestMatcher("/login"))
-                .requestMatcher(new AntPathRequestMatcher("/register")) // use this filter chain for only these two end
-                                                                        // points
-                .authorizeHttpRequests(auth -> auth.antMatchers("/register").permitAll()
-                        .anyRequest()
-                        .authenticated())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .csrf(AbstractHttpConfigurer::disable)
-                .exceptionHandling(ex -> {
-                    ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
-                    ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
-                })
-                .httpBasic(Customizer.withDefaults()).build();
+     return http
+				.requestMatchers().antMatchers("/login","/register").and()
+				.authorizeHttpRequests(auth -> auth.antMatchers("/register").permitAll().anyRequest().authenticated())
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.csrf(AbstractHttpConfigurer::disable)
+				.exceptionHandling(ex -> {
+					ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
+					ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
+				})
+				.httpBasic(Customizer.withDefaults())
+				.build();
     }
 
     @Bean
