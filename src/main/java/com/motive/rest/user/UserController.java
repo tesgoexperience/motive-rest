@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.motive.rest.Auth.AuthService;
 import com.motive.rest.dto.DTOFactory;
 import com.motive.rest.dto.DTOFactory.DTO_TYPE;
 import com.motive.rest.user.dto.UserDto;
 
 import org.springframework.web.bind.annotation.GetMapping;
 
-//TODO refactor according to https://github.com/joseph-redmond/lLamaWork/blob/abf66589b9720a4f5c330e982b0789d6de9572e9/src/main/java/tech/jrdev/llamawork/web/rest/UserJWTController.java
 @Controller
 @RequestMapping(path = "/user")
 @PreAuthorize("isAuthenticated()")
@@ -29,11 +29,14 @@ public class UserController {
   @Autowired
   DTOFactory dtoFactory;
 
+  @Autowired
+  AuthService auth;
+  
   // return information about the authenticated user
   @GetMapping(value = "/")
   @ResponseBody
-  public String home(Authentication auth) throws Exception {
-    return auth.getName();
+  public String home() throws Exception {
+    return auth.getAuthUser().getUsername();
   }
 
 }

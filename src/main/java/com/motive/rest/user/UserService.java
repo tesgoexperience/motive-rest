@@ -13,16 +13,15 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.motive.rest.Util.ServiceInterface;
 import com.motive.rest.exceptions.EntityNotFound;
-// import com.motive.rest.security.CustomUserDetailsService;
-
-import java.util.Date;
 
 @Service
-public class UserService {
+public class UserService implements ServiceInterface<User>{
 
     public enum REQUEST_RESPONSE {
         ACCEPT, REJECT, CANCEL, REMOVE_FRIEND
@@ -33,17 +32,6 @@ public class UserService {
 
     @Autowired
     UserRepo repo;
-
-
-
-    public User getCurrentUser() {
-        return null;
-    }
-
-
-    public boolean userExists(User user) {
-        return repo.findByEmail(user.getEmail()) != null || repo.findByUsername(user.getUsername()) != null;
-    }
 
     public User findByUsername(String username) throws EntityNotFound{
         User user = repo.findByUsername(username);
@@ -64,6 +52,22 @@ public class UserService {
         }
 
         return user;
+    }
+
+    @Override
+    public User save(User object) {
+        return repo.save(object);
+    }
+
+    @Override
+    public void delete(User object) {
+       repo.delete(object);
+        
+    }
+
+    @Override
+    public User findById(UUID id) {
+        return repo.findById(id).orElseThrow();
     }
    
 }

@@ -42,6 +42,6 @@ public class ExceptionController {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public String handleServerErrors(Exception ex) {
-        return "sorry we are not sure what went wrong";
+        return "Sorry, something went wrong :(";
     }
 }

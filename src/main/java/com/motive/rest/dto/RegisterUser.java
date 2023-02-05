@@ -2,7 +2,7 @@ package com.motive.rest.dto;
 
 
 
-import javax.validation.constraints.Min;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -19,7 +19,7 @@ public class RegisterUser {
     String password;
     @NotNull
     String confirmPassword;
-    @NotNull
+    @NotNull @Email
     String email;
 
 
