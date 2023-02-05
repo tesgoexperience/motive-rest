@@ -16,8 +16,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.motive.rest.exceptions.IllogicalRequest;
+import com.motive.rest.Auth.AuthService;
 import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.exceptions.EntityNotFound;
+
 
 @Service
 public class FriendshipService {
@@ -30,13 +32,15 @@ public class FriendshipService {
     @Autowired
     private FriendRepo repo;
 
+    @Autowired
+    AuthService authService;
     /**
      * Will find all users this user has an approved friendship with.
      * @return the list of users this user has resoved frienships requests with
      * 
      */
     public List<User> getFriends(){
-       return extractFriends(repo.findApprovedRequests(userService.getCurrentUser().getId())); 
+       return extractFriends(repo.findApprovedRequests(authService.getAuthUser().getId())); 
     }
     
     /**
@@ -45,7 +49,7 @@ public class FriendshipService {
      * @return the users this user has recieved requests from
      */
     public List<User> getRequestsRecieved(boolean includeApproved){
-        return extractFriends(repo.findRequestsRecieved(userService.getCurrentUser().getId(), includeApproved));
+        return extractFriends(repo.findRequestsRecieved(authService.getAuthUser().getId(), includeApproved));
     }
 
     /**
@@ -54,7 +58,7 @@ public class FriendshipService {
      * @return the users this user has sent requests 
      */
     public List<User> getRequestsSent(boolean includeApproved){
-        return extractFriends(repo.findRequestsSent(userService.getCurrentUser().getId(), includeApproved));
+        return extractFriends(repo.findRequestsSent(authService.getAuthUser().getId(), includeApproved));
     }
 
 
@@ -66,7 +70,7 @@ public class FriendshipService {
     private List<User> extractFriends(List<Friendship> friendships){
         List<User> friends = new ArrayList<>();
         for (Friendship friendship : friendships) {
-            if (friendship.getSender().equals(userService.getCurrentUser())) {
+            if (friendship.getSender().equals(authService.getAuthUser())) {
                 friends.add(friendship.getReceiver());
             } else {
                 friends.add(friendship.getSender());
@@ -101,7 +105,7 @@ public class FriendshipService {
     }
 
     public Friendship getFriendshipWithUser(User friend) throws EntityNotFound {
-        Optional<Friendship> friendship = repo.findFriendship(userService.getCurrentUser().getId(), friend.getId());
+        Optional<Friendship> friendship = repo.findFriendship(authService.getAuthUser().getId(), friend.getId());
        
         if(friendship.isPresent())
         {
@@ -121,7 +125,7 @@ public class FriendshipService {
 
     public void respondToRequest(String username, boolean accept) throws IllogicalRequest, EntityNotFound {
 
-        User user = userService.getCurrentUser();
+        User user = authService.getAuthUser();
         User friend = userService.findByUsername(username);
 
         // get the request received from this friend
@@ -147,7 +151,7 @@ public class FriendshipService {
     public void createRequest(String username) throws EntityNotFound, IllogicalRequest {
         // TODO push to friend's notification stack
         User friend = userService.findByUsername(username);
-        User user = userService.getCurrentUser();
+        User user = authService.getAuthUser();
 
         if (friend == null) {
             throw new EntityNotFound("User not found.");

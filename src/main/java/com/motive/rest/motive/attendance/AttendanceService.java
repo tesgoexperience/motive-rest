@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.motive.rest.Auth.AuthService;
 import com.motive.rest.dto.DTOFactory;
 import com.motive.rest.dto.DTOFactory.DTO_TYPE;
 import com.motive.rest.exceptions.EntityNotFound;
@@ -23,6 +24,7 @@ import com.motive.rest.user.friendship.FriendshipService;
 
 @Service
 public class AttendanceService {
+
     @Autowired
     DTOFactory dtoFactory;
     @Autowired
@@ -32,10 +34,12 @@ public class AttendanceService {
     @Autowired
     UserService userService;
     @Autowired
+    AuthService authService;
+    @Autowired
     FriendshipService friendshipService;
 
     public void cancelAttendance(Long motiveId) {
-        User user = userService.getCurrentUser();
+        User user = authService.getAuthUser();
         Motive motive = motiveService.getMotive(motiveId);
 
         if (!hasAttendance(user, motive)) {
@@ -46,7 +50,7 @@ public class AttendanceService {
     }
 
     public void requestAttendance(Long motiveId, boolean anonymous) {
-        User user = userService.getCurrentUser();
+        User user = authService.getAuthUser();
         Motive motive = motiveService.getMotive(motiveId);
 
         if (user.equals(motive.getOwner())) {
@@ -95,7 +99,7 @@ public class AttendanceService {
         Attendance attendance = optionalAttendance.get();
 
         // validate user is authorized to make this request
-        if (!attendance.getMotive().getOwner().equals(userService.getCurrentUser())) {
+        if (!attendance.getMotive().getOwner().equals(authService.getAuthUser())) {
             throw new UnauthorizedRequest("You cannot to attendance request as you not the motive owner");
         }
 
@@ -129,7 +133,7 @@ public class AttendanceService {
     }
 
     public Optional<Attendance> findByMotiveAndUser(Long motiveId) {
-        return repo.findByMotiveAndUser(motiveService.getMotive(motiveId), userService.getCurrentUser());
+        return repo.findByMotiveAndUser(motiveService.getMotive(motiveId), authService.getAuthUser());
     }
 
     public AttendanceDTO motiveAttendance(Long motiveId) {

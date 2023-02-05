@@ -1,7 +1,9 @@
 package com.motive.rest.Util;
 
+import java.util.UUID;
+
 public interface ServiceInterface<T> {
     T save(T object);
-    boolean delete(T object);
-    boolean findById(T id);
+    void delete(T object);
+    T findById(UUID id);
 }

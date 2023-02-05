@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.motive.rest.Auth.AuthService;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 
@@ -15,10 +16,11 @@ public class NotificationService {
     private UserService userService;
     @Autowired
     private NotificationRepo repo;
-
+    @Autowired
+    AuthService authService;
     // get unacknowledged notifications
     public List<Notification> getUnacknowledgedNotifications(){
-        return   repo.findByRecipientAndAcknowledged(userService.getCurrentUser(), false);
+        return   repo.findByRecipientAndAcknowledged(authService.getAuthUser(), false);
     }
 
     // creates a new notification
