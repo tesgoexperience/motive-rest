@@ -56,8 +56,7 @@ public class SecurityConfig {
                                 .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
                 .build();
     }
-        /*
-     * This was added via PR (thanks to @ch4mpy)
+    /*
      * This will allow the /token endpoint to use basic auth and everything else
      * uses the SFC above
      */

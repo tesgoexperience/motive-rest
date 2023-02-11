@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.motive.rest.Util.ServiceInterface;
 import com.motive.rest.dto.RegisterUser;
+import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 
@@ -18,6 +19,7 @@ public class AuthService implements ServiceInterface<AuthDetails> {
 
     @Autowired
     UserService userService;
+
     @Autowired
     AuthRepo repo;
 
@@ -25,6 +27,19 @@ public class AuthService implements ServiceInterface<AuthDetails> {
     PasswordEncoder passwordEncoder;
 
     public void createUser(RegisterUser userDetails) {
+
+        if (!userDetails.getConfirmPassword().equals(userDetails.getPassword())) {
+            throw new BadUserInput("confirm password must match password.");
+        }
+
+        if (repo.findByEmail(userDetails.getEmail()).isPresent()) {
+            throw new BadUserInput("email is already in use.");
+        }
+
+        if (userService.usernameExists(userDetails.getUsername())) {
+            throw new BadUserInput("username is already in use.");
+        }
+
         User user = new User(userDetails.getUsername());
         AuthDetails authDetails = new AuthDetails(userDetails.getEmail(),
                 passwordEncoder.encode(userDetails.getPassword()), user);

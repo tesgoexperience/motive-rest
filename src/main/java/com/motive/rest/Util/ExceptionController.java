@@ -10,15 +10,17 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import com.motive.rest.exceptions.BadUserInput;
 
-@ControllerAdvice 
+@ControllerAdvice
 public class ExceptionController {
-    
 
     /**
-     * This method hands javax constraint validation failures for DTOs. 
+     * This method hands javax constraint validation failures for DTOs.
+     * 
      * @param ex the exception thrown by the javax validator
-     * @return a map of <Field, error message> e.g. <"username", "username cannot be null">
+     * @return a map of <Field, error message> e.g. <"username", "username cannot be
+     *         null">
      */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -34,9 +36,24 @@ public class ExceptionController {
     }
 
     /**
-     * This method handles all other errors thrown that do not have a handler already implemented
+     * This method will return an error if the client request contains illogical data. For example, a password that is two characters long
+     * 
+     * @param ex the exception thrown
+     * @return the error message
+     */
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(BadUserInput.class)
+    @ResponseBody
+    public String dtoObject(BadUserInput ex) {
+       return ex.getMessage();
+    }
+
+    /**
+     * This method handles all other errors thrown that do not have a handler
+     * already implemented
+     * 
      * @param ex the exception thrown by the javax validator
-     * @return 
+     * @return
      */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
