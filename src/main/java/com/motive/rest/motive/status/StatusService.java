@@ -1,9 +1,7 @@
 package com.motive.rest.motive.status;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.motive.rest.Auth.AuthService;
 import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.exceptions.IllogicalRequest;
 import com.motive.rest.exceptions.UnauthorizedRequest;
@@ -31,8 +30,11 @@ public class StatusService {
     @Autowired
     FriendshipService friendshipService;
 
+    @Autowired
+    AuthService authService;
+    
     public List<StatusBrowseDTO> getAll() {
-        User currentUser = userService.getCurrentUser();
+        User currentUser = authService.getAuthUser();
         // friends who can see the status
         List<User> friends = friendshipService.getFriends().stream()
                 .filter(f -> !currentUser.getHideStatusFrom().contains(f)).collect(Collectors.toList());
@@ -59,7 +61,7 @@ public class StatusService {
     }
 
     private StatusBrowseDTO toStatusBrowseDTO(Status status) {
-        User currentUser = userService.getCurrentUser();
+        User currentUser = authService.getAuthUser();
 
         return new StatusBrowseDTO(status.getId(), status.getTitle(), status.getOwner().getUsername(),
                 status.getCreateDate(), currentUser.equals(status.getOwner()), getInterest(status, currentUser)!=null);
@@ -67,7 +69,7 @@ public class StatusService {
 
     public boolean showInterest(Long statusID, boolean add) {
         // check they are friends
-        User currentUser = userService.getCurrentUser();
+        User currentUser = authService.getAuthUser();
         Status status = getById(statusID);
         
         friendshipService.validateFriendship(status.getOwner());
@@ -103,12 +105,12 @@ public class StatusService {
     }
 
     public ResponseEntity<Boolean> createStatus(String status) {
-        repo.save(new Status(status, userService.getCurrentUser()));
+        repo.save(new Status(status,authService.getAuthUser()));
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public void ValidateOwnership(Status status){
-        if (!status.getOwner().equals(userService.getCurrentUser())) {
+        if (!status.getOwner().equals( authService.getAuthUser())) {
             throw new UnauthorizedRequest("Permission denied.");
         }
     }

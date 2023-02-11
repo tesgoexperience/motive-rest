@@ -1,5 +1,6 @@
 package com.motive.rest.motive;
 
+import com.motive.rest.Auth.AuthService;
 import com.motive.rest.dto.DTOFactory;
 import com.motive.rest.dto.DTOFactory.DTO_TYPE;
 import com.motive.rest.exceptions.EntityNotFound;
@@ -46,6 +47,8 @@ public class MotiveService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    AuthService authService;
     /**
      * Creates a motive and notifies this users friends
      * 
@@ -57,7 +60,7 @@ public class MotiveService {
      */
     public MotiveManageDTO createMotive(String title, String description, Date start, Motive.ATTENDANCE_TYPE type,
             String[] specificallyInvited) {
-        User user = userService.getCurrentUser();
+        User user = authService.getAuthUser();
 
         Motive motive = new Motive(
                 user,
@@ -122,7 +125,7 @@ public class MotiveService {
 
     @SuppressWarnings("unchecked")
     public List<MotiveBrowseDTO> browseMotives() {
-        User user = userService.getCurrentUser();
+        User user = authService.getAuthUser();
         // don't include the motives the user owns in the list
         List<Motive> motives = getActiveMotives().stream().filter(m -> !m.getOwner().equals(user))
                 .collect(Collectors.toList());
@@ -132,7 +135,7 @@ public class MotiveService {
 
     @SuppressWarnings("unchecked")
     public List<MotiveBrowseDTO> getAttending() {
-        User user = userService.getCurrentUser();
+        User user = authService.getAuthUser();
 
         List<Motive> motives = getActiveMotives().stream().filter(m -> attendanceRepo.findByMotiveAndUser(m, user).isPresent())
                 .collect(Collectors.toList());
@@ -142,7 +145,7 @@ public class MotiveService {
 
     @SuppressWarnings("unchecked")
     public List<MotiveManageDTO> manageMotives() {
-        return (List<MotiveManageDTO>) dtoFactory.getDto(repo.findByOwner(userService.getCurrentUser()),
+        return (List<MotiveManageDTO>) dtoFactory.getDto(repo.findByOwner(authService.getAuthUser()),
                 DTO_TYPE.MOTIVE_MANAGE);
     }
 
@@ -171,14 +174,14 @@ public class MotiveService {
      * @return whether or not this user can attend this motive
      */
     private boolean canAttend(Motive motive) {
-        if (motive.getOwner().equals(userService.getCurrentUser())
+        if (motive.getOwner().equals(authService.getAuthUser())
                 || motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.EVERYONE)) {
             return true;
         }
 
         if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.SPECIFIC_FRIENDS)) {
             return motive.getSpecificallyInvited().stream().map(e -> e.getUser()).collect(Collectors.toList())
-                    .contains(userService.getCurrentUser());
+                    .contains(authService.getAuthUser());
         }
 
         if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.FRIENDS)) {
@@ -193,7 +196,7 @@ public class MotiveService {
     }
 
     public void validateOwner(Motive motive) {
-        if (!motive.getOwner().equals(userService.getCurrentUser())) {
+        if (!motive.getOwner().equals(authService.getAuthUser())) {
             throw new UnauthorizedRequest("Forbidden from this action.");
         }
         ;
