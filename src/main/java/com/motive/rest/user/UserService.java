@@ -2,21 +2,11 @@ package com.motive.rest.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import com.motive.rest.Util.ServiceInterface;
 import com.motive.rest.exceptions.EntityNotFound;
 
@@ -34,13 +24,17 @@ public class UserService implements ServiceInterface<User>{
     UserRepo repo;
 
     public User findByUsername(String username) throws EntityNotFound{
-        User user = repo.findByUsername(username);
+        Optional<User> user = repo.findByUsername(username);
 
-        if (user==null) {
+        if (user.isEmpty()) {
             throw new EntityNotFound("User not found");
         }
 
-        return user;
+        return user.get();
+    }
+
+    public boolean usernameExists(String username) {
+        return  repo.findByUsername(username).isPresent();
     }
 
 

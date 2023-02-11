@@ -1,26 +1,12 @@
 package com.motive.rest.user;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.motive.rest.Auth.AuthDetails;
-import com.motive.rest.user.friendship.Friendship;
-
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
-import lombok.Setter;
-import lombok.ToString;
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
