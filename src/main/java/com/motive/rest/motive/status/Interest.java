@@ -24,7 +24,7 @@ import javax.persistence.UniqueConstraint;
 @Setter
 @ToString
 @EqualsAndHashCode
-@Table(uniqueConstraints = {@UniqueConstraint(name = "DUPLICATE_ENTRY", columnNames = { "status_id", "user_id" }) })
+@Table(uniqueConstraints = {@UniqueConstraint(name = "DUPLICATE_INTEREST_ENTRY", columnNames = { "status_id", "user_id" }) })
 public class Interest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id

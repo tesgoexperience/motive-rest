@@ -40,7 +40,7 @@ public class FriendshipService {
      * 
      */
     public List<User> getFriends(){
-       return extractFriends(repo.findApprovedRequests(authService.getAuthUser().getId())); 
+       return extractFriends(repo.findApprovedRequests(authService.getAuthUser().getId().toString())); 
     }
     
     /**
@@ -49,7 +49,7 @@ public class FriendshipService {
      * @return the users this user has recieved requests from
      */
     public List<User> getRequestsRecieved(boolean includeApproved){
-        return extractFriends(repo.findRequestsRecieved(authService.getAuthUser().getId(), includeApproved));
+        return extractFriends(repo.findRequestsRecieved(authService.getAuthUser().getId().toString(), includeApproved));
     }
 
     /**
@@ -58,7 +58,7 @@ public class FriendshipService {
      * @return the users this user has sent requests 
      */
     public List<User> getRequestsSent(boolean includeApproved){
-        return extractFriends(repo.findRequestsSent(authService.getAuthUser().getId(), includeApproved));
+        return extractFriends(repo.findRequestsSent(authService.getAuthUser().getId().toString(), includeApproved));
     }
 
 
@@ -105,7 +105,7 @@ public class FriendshipService {
     }
 
     public Friendship getFriendshipWithUser(User friend) throws EntityNotFound {
-        Optional<Friendship> friendship = repo.findFriendship(authService.getAuthUser().getId(), friend.getId());
+        Optional<Friendship> friendship = repo.findFriendship(authService.getAuthUser().getId().toString(), friend.getId().toString());
        
         if(friendship.isPresent())
         {
@@ -158,7 +158,7 @@ public class FriendshipService {
         }
 
         if (friend.equals(user)) {
-            throw new IllogicalRequest("You cannot request yourself.");
+            throw new BadUserInput("You cannot request yourself.");
         }
         
         if (getFriends().contains(user) || getRequestsRecieved(false).contains(user) || getRequestsSent(false).contains(user)) {

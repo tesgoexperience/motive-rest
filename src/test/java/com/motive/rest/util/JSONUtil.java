@@ -1,6 +1,7 @@
 package com.motive.rest.util;
 
-import com.github.javafaker.Faker;
+
+import net.datafaker.Faker;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
