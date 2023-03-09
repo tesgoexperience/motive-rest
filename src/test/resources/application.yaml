@@ -24,4 +24,4 @@ jwt:
   private-key: 'classpath:certs/private-key.pem'
 
 client:
-  url: '${REACT_CLIENT_URL}'
+  url: ${REACT_CLIENT_URL} 
