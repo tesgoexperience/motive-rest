@@ -1,7 +1,6 @@
 {
     "version": "0.2.0",
     "configurations": [
-
         {
             "type": "java",
             "name": "Launch RestApplication",
@@ -14,8 +13,10 @@
                 "MYSQL_PASSWORD": "motivepassword",
                 "MYSQL_DATABASE_HOST": "localhost",
                 "MYSQL_DATABASE": "motivedb",
-                "REACT_CLIENT": "http://localhost:3000"
+                "REACT_CLIENT_URL": "192.168.1.149:19000",
             }
         }
     ]
 }
+
+// export JWT_SIGNATURE=48b4d3e5-3220-4068-bb28-9d4d5a1fbeb0 && export MYSQL_USERNAME=motiveuser && export MYSQL_PASSWORD=motivepassword && export MYSQL_DATABASE_HOST=localhost && export MYSQL_DATABASE=motivedb && export REACT_CLIENT_URL='192.168.1.149:19000'

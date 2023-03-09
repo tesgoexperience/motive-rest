@@ -29,6 +29,7 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
-.vscode/settings.json
+.vscode/
 *session.sql
 certs/
+bin/
