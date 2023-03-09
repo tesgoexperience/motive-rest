@@ -2,14 +2,16 @@ package com.motive.rest.security;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -32,6 +34,10 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
 @EnableWebSecurity
 public class SecurityConfig {
 
@@ -40,13 +46,17 @@ public class SecurityConfig {
 
     @Value("${jwt.private-key}")
     private RSAPrivateKey rsaPrivateKey;
+
+    @Value("${client.url}")
+    private String reactClient;
+    
     /*
      * Take a http security object and customize it by adding jwt authentication
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        return http
+        return http.cors().and()
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -64,17 +74,17 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain tokenSecurityFilterChain(HttpSecurity http) throws Exception {
 
-     return http
-				.requestMatchers().antMatchers("/login","/register").and()
-				.authorizeHttpRequests(auth -> auth.antMatchers("/register").permitAll().anyRequest().authenticated())
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.csrf(AbstractHttpConfigurer::disable)
-				.exceptionHandling(ex -> {
-					ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
-					ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
-				})
-				.httpBasic(Customizer.withDefaults())
-				.build();
+        return http.cors().and()
+                    .requestMatchers().antMatchers("/login","/register").and()
+                    .authorizeHttpRequests(auth -> auth.antMatchers("/register").permitAll().anyRequest().authenticated())
+                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                    .csrf(AbstractHttpConfigurer::disable)
+                    .exceptionHandling(ex -> {
+                        ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
+                        ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
+                    })
+                    .httpBasic(Customizer.withDefaults())
+                    .build();
     }
 
     @Bean
@@ -94,4 +104,15 @@ public class SecurityConfig {
         return new NimbusJwtEncoder(jwks);
     }
 
+     // Used by spring security if CORS is enabled.
+     @Bean
+     CorsConfigurationSource corsConfigurationSource() {
+         CorsConfiguration configuration = new CorsConfiguration();
+         configuration.setAllowedOrigins(List.of(reactClient));
+         configuration.setAllowedHeaders(List.of("*"));
+         configuration.setAllowedMethods(List.of("*"));
+         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+         source.registerCorsConfiguration("/**", configuration);
+         return source;
+     }
 }
