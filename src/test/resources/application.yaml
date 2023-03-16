@@ -7,7 +7,7 @@ spring:
     initialization-mode: always
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
   mvc:
     log-request-details: true
 
