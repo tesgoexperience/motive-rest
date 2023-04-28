@@ -20,9 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Install Mariadb
-      shell: bash
-      run: ./.github/workflows/dependencies/mariadb.sh
     - name: Create Openssl RSA Files
       shell: bash
       run: ./.github/workflows/dependencies/openssl.sh
@@ -32,15 +29,6 @@ jobs:
         java-version: 11
         distribution: temurin
     - name: Build with Gradle
-      env:
-        JWT_SIGNATURE: 48b4d3e5-3220-4068-bb28-9d4d5a1fbeb0
-        DB_USERNAME: motiveuser
-        DB_PASSWORD: motivepassword
-        DB_DATABASE_HOST: localhost
-        DB_DATABASE: motivedb
-        REACT_CLIENT_URL: 192.168.1.149:19000
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
         arguments: build --debug
-
-# export JWT_SIGNATURE=48b4d3e5-3220-4068-bb28-9d4d5a1fbeb0 && export DB_USERNAME=motiveuser && export DB_PASSWORD=motivepassword && export DB_DATABASE_HOST=localhost && export DB_DATABASE=motivedb && export REACT_CLIENT_URL='192.168.1.149:19000'
