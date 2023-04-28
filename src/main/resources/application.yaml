@@ -7,11 +7,10 @@ spring:
     initialization-mode: always
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
   mvc:
     log-request-details: true
 
-JWT_SIGNATURE: '${JWT_SIGNATURE}'
 REACT_CLIENT: '${REACT_CLIENT}'
 
 logging:
@@ -24,4 +23,4 @@ jwt:
   private-key: 'classpath:certs/private-key.pem'
 
 client:
-  url: '${REACT_CLIENT_URL}'
+  url: ${REACT_CLIENT_URL} 

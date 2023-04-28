@@ -17,9 +17,6 @@ public class UserService implements ServiceInterface<User>{
         ACCEPT, REJECT, CANCEL, REMOVE_FRIEND
     }
 
-    @Value("${JWT_SIGNATURE}")
-    String JWTSignature;
-
     @Autowired
     UserRepo repo;
 
