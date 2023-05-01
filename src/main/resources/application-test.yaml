@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:hsqldb:mem:motivedb
-    username: sa
-    password: sa
+    username: username
+    password: password
     initialization-mode: always
   driverClassName: org.hsqldb.jdbcDriver  
   jpa:

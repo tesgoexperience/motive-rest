@@ -7,6 +7,7 @@ import org.junit.runner.RunWith;
 
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,7 @@ import com.motive.rest.util.SimpleResponse;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class AuthTest {
 
@@ -43,17 +45,19 @@ public class AuthTest {
                                 HttpStatus.OK);
         }
 
-        // @Test
-        // public void login() throws Exception {
-        //         JSONObject user = json.userObject();
-        //         assertEquals(mvcUtil.postRequest("/register", user.toJSONString()).getStatus(), HttpStatus.OK);
+        @Test
+        public void login() throws Exception {
+                JSONObject user = json.userObject();
+                assertEquals(mvcUtil.postRequest("/register", user.toJSONString()).getStatus(), HttpStatus.OK);
 
-        //         SimpleResponse response = mvcUtil.postRequest("/login", "", user.get("email").toString(),user.get("password").toString());
-        //         assertEquals(response.getStatus(), HttpStatus.OK);
-        //         assertTrue(response.getBody().contains("Bearer"));
-        //         assertEquals(mvcUtil.getRequest("/user/", response.getBody()).getStatus(), HttpStatus.OK);
+                SimpleResponse response = mvcUtil.postRequest("/login", "", user.get("email").toString(),user.get("password").toString());
+                assertEquals(response.getStatus(), HttpStatus.OK);
+                assertTrue(response.getBody().contains("Bearer"));
+                assertEquals(mvcUtil.getRequest("/user/", response.getBody()).getStatus(), HttpStatus.OK);
 
-        // }
+                SimpleResponse username = mvcUtil.getRequest("/user/", response.getBody());
+                assertEquals(user.get("username"), username.getBody());
+        }
 
         @Test
         public void login_with_invalid_credentials() throws Exception {
