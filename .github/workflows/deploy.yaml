@@ -25,7 +25,11 @@ jobs:
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
         arguments: build --debug
-
+    - name: Upload JAR
+      uses: actions/upload-artifact@v2
+      with:
+        name: artifact
+        path: ./build/libs/motive-rest-0.0.1-SNAPSHOT.jar
   deploy:
     needs: build
     name: Deploy
