@@ -8,23 +8,24 @@ on:
       - main
 jobs:
   build:
-    name: Build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: 11
-      - name: Build with Gradle
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-        env:
-          SPRING_PROFILES_ACTIVE: test
-      - name: Upload JAR
-        uses: actions/upload-artifact@v2
-        with:
-          name: artifact
-          path: ./build/libs/motive-rest-0.0.1-SNAPSHOT.jar
+    - uses: actions/checkout@v3
+    - name: Create Openssl RSA Files
+      shell: bash
+      run: ./.github/workflows/dependencies/openssl.sh
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: 11
+        distribution: temurin
+    - name: Build with Gradle
+      env:
+        SPRING_PROFILES_ACTIVE: test
+      uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
+      with:
+        arguments: build --debug
+
   deploy:
     needs: build
     name: Deploy
