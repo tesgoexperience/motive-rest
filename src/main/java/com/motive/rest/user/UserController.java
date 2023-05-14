@@ -23,7 +23,7 @@ public class UserController {
   @GetMapping(value = "/")
   @ResponseBody
   public String home() throws Exception {
-    return auth.getAuthUser().getUsername();
+    return "hello " + auth.getAuthUser().getUsername();
   }
 
 }
