@@ -56,7 +56,7 @@ public class AuthTest {
                 assertEquals(mvcUtil.getRequest("/user/", response.getBody()).getStatus(), HttpStatus.OK);
 
                 SimpleResponse username = mvcUtil.getRequest("/user/", response.getBody());
-                assertTrue( username.getBody().contains(user.get("username").toString()));
+                assertEquals(user.get("username"), username.getBody());
         }
 
         @Test
