@@ -27,7 +27,7 @@ public class StatusController {
 
     @GetMapping(value = "/")
     @ResponseBody
-    public List<StatusBrowseDTO> browseMotives() {
+    public List<StatusBrowseDTO> browseStatus() {
         return service.getAll();
     }
 

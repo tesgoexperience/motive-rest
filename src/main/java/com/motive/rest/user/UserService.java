@@ -1,7 +1,6 @@
 package com.motive.rest.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,9 +15,6 @@ public class UserService implements ServiceInterface<User>{
     public enum REQUEST_RESPONSE {
         ACCEPT, REJECT, CANCEL, REMOVE_FRIEND
     }
-
-    @Value("${JWT_SIGNATURE}")
-    String JWTSignature;
 
     @Autowired
     UserRepo repo;

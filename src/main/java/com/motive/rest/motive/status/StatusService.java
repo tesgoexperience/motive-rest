@@ -36,9 +36,12 @@ public class StatusService {
     public List<StatusBrowseDTO> getAll() {
         User currentUser = authService.getAuthUser();
         // friends who can see the status
-        List<User> friends = friendshipService.getFriends().stream()
-                .filter(f -> !currentUser.getHideStatusFrom().contains(f)).collect(Collectors.toList());
-
+        List<User> friends = friendshipService.getFriends();
+        for (User friend : friends) {
+            if (friend.getHideStatusFrom().contains(currentUser)) {
+                friends.remove(friend);
+            }
+        }
         List<StatusBrowseDTO> statusList = repo.findByOwnerAndNotExpired(currentUser).stream()
                 .map(s -> toStatusBrowseDTO(s)).collect(Collectors.toList());
         // add the statuses by the current users

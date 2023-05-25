@@ -10,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
+
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
@@ -34,7 +35,6 @@ public class User {
     @Column(name = "username", unique = true)
     private String username;
 
-
     @ElementCollection
     private Set<User> hideStatusFrom;
 
@@ -46,4 +46,11 @@ public class User {
         this.hideStatusFrom = new HashSet<>();
     }
 
+    @Override public boolean equals(Object o) {
+        if (!(o instanceof User)) {
+            return false;
+        }
+        User user = (User)o;
+        return  user.getId().equals(this.id) && user.getUsername().equals(this.username) && user.getAuthDetails().getEmail().equals(this.authDetails.getEmail());
+      }
 }
