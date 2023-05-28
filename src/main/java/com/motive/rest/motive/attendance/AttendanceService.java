@@ -38,7 +38,7 @@ public class AttendanceService {
     @Autowired
     FriendshipService friendshipService;
 
-    public void cancelAttendance(Long motiveId) {
+    public void cancelMyAttendance(Long motiveId) {
         User user = authService.getAuthUser();
         Motive motive = motiveService.getMotive(motiveId);
 
@@ -47,6 +47,21 @@ public class AttendanceService {
         }
 
         repo.delete(findByMotiveAndUser(motiveId).get());
+    }
+
+    public void removeAttendee(AttendanceResponseDto response) {
+        User user = userService.findByUsername(response.getAttendeeUsername());
+        Motive motive = motiveService.getMotive(response.getMotiveId());
+
+        // throws error if this user is not the owner
+        motiveService.validateOwner(motive);
+            
+        
+        if (!hasAttendance(user, motive)) {
+            throw new IllogicalRequest("User is not attending this motive.");
+        }
+
+        repo.delete(findByMotiveAndUser(response.getMotiveId(),user).get());
     }
 
     public void requestAttendance(Long motiveId, boolean anonymous) {
@@ -133,9 +148,11 @@ public class AttendanceService {
     }
 
     public Optional<Attendance> findByMotiveAndUser(Long motiveId) {
-        return repo.findByMotiveAndUser(motiveService.getMotive(motiveId), authService.getAuthUser());
+        return findByMotiveAndUser(motiveId, authService.getAuthUser());
     }
-
+    public Optional<Attendance> findByMotiveAndUser(Long motiveId, User user) {
+        return repo.findByMotiveAndUser(motiveService.getMotive(motiveId), user);
+    }
     public AttendanceDTO motiveAttendance(Long motiveId) {
         Optional<Attendance> att = findByMotiveAndUser(motiveId);
         if (att.isPresent()) {

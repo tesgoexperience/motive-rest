@@ -1,6 +1,7 @@
 package com.motive.rest.motive;
 
 import com.motive.rest.Auth.AuthService;
+import com.motive.rest.dto.DTO;
 import com.motive.rest.dto.DTOFactory;
 import com.motive.rest.dto.DTOFactory.DTO_TYPE;
 import com.motive.rest.exceptions.EntityNotFound;
@@ -49,6 +50,7 @@ public class MotiveService {
 
     @Autowired
     AuthService authService;
+
     /**
      * Creates a motive and notifies this users friends
      * 
@@ -123,6 +125,24 @@ public class MotiveService {
         return motive.get();
     }
 
+    public DTO getMotiveDto(Long id) {
+        Optional<Motive> motive = repo.findById(id);
+        if (!motive.isPresent()) {
+            throw new EntityNotFound("Could not find motive");
+        }
+
+        if (motive.get().getOwner().equals(authService.getAuthUser())) {
+            return dtoFactory.getDto(motive.get(), DTOFactory.DTO_TYPE.MOTIVE_MANAGE);
+        }
+        
+        if (!canAttend(motive.get())) {
+            return dtoFactory.getDto(repo.findById(id), DTOFactory.DTO_TYPE.MOTIVE_BROWSE);
+        } else {
+            throw new UnauthorizedRequest("Forbidden from this action.");
+        }
+
+    }
+
     @SuppressWarnings("unchecked")
     public List<MotiveBrowseDTO> browseMotives() {
         User user = authService.getAuthUser();
@@ -137,9 +157,10 @@ public class MotiveService {
     public List<MotiveBrowseDTO> getAttending() {
         User user = authService.getAuthUser();
 
-        List<Motive> motives = getActiveMotives().stream().filter(m -> attendanceRepo.findByMotiveAndUser(m, user).isPresent())
+        List<Motive> motives = getActiveMotives().stream()
+                .filter(m -> attendanceRepo.findByMotiveAndUser(m, user).isPresent())
                 .collect(Collectors.toList());
-                
+
         return (List<MotiveBrowseDTO>) dtoFactory.getDto(motives, DTO_TYPE.MOTIVE_BROWSE);
     }
 
@@ -192,7 +213,7 @@ public class MotiveService {
     }
 
     public StatsDTO getStats() {
-        return new StatsDTO(getAttending().size()+manageMotives().size(), 0, getActiveMotives().size());
+        return new StatsDTO(getAttending().size() + manageMotives().size(), 0, getActiveMotives().size());
     }
 
     public void validateOwner(Motive motive) {

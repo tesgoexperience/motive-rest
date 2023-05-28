@@ -9,8 +9,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.motive.rest.dto.DTO;
 import com.motive.rest.motive.attendance.dto.StatsDTO;
 import com.motive.rest.motive.dto.CreateMotiveDTO;
 import com.motive.rest.motive.dto.MotiveBrowseDTO;
@@ -60,6 +62,11 @@ public class MotiveController {
     }
 
 
+    @GetMapping(value = "/get")
+    @ResponseBody //todo use manageDto rather than createMotiveDto here to make reduce repition for updates
+    public ResponseEntity<DTO> getMotive(@RequestParam Long motive) {
+        return new ResponseEntity<>(service.getMotiveDto(motive), HttpStatus.OK);
+    }
 
     // @PostMapping(value = "/update")
     // @ResponseBody

@@ -28,38 +28,44 @@ public class AttendanceController {
 
     @PostMapping(value = "/request")
     @ResponseBody
-    public void requestAttendance(@RequestBody Map<String,String> req){
+    public void requestAttendance(@RequestBody Map<String, String> req) {
         service.requestAttendance(Long.valueOf(req.get("motive")), req.get("anonymous").equals("true"));
     }
 
     @GetMapping(value = "/pending")
     @ResponseBody
-    public List<AttendanceDTO> getAllPendingRequests(@RequestParam String motiveId){ //todo move to body
+    public List<AttendanceDTO> getAllPendingRequests(@RequestParam String motiveId) { // todo move to body
         return service.getPendingAttendance(Long.valueOf(motiveId));
     }
 
     @GetMapping(value = "/")
     @ResponseBody
-    public AttendanceDTO getAttendanceForMotive(@RequestParam String motiveId){
+    public AttendanceDTO getAttendanceForMotive(@RequestParam String motiveId) {
         return service.motiveAttendance(Long.valueOf(motiveId));
     }
-    
+
     @PostMapping(value = "/accept")
     @ResponseBody
-    public void respondToAttendanceRequestAccept(@RequestBody AttendanceResponseDto req){
-        service.respondToAttendanceRequest(req,true);
+    public void respondToAttendanceRequestAccept(@RequestBody AttendanceResponseDto req) {
+        service.respondToAttendanceRequest(req, true);
     }
 
     @PostMapping(value = "/reject")
     @ResponseBody
-    public void respondToAttendanceRequest(@RequestBody AttendanceResponseDto req){
-        service.respondToAttendanceRequest(req,false);
+    public void respondToAttendanceRequest(@RequestBody AttendanceResponseDto req) {
+        service.respondToAttendanceRequest(req, false);
+    }
+
+    @PostMapping(value = "/remove")
+    @ResponseBody
+    public void removeAttendee(@RequestBody AttendanceResponseDto req) {
+        service.removeAttendee(req);
     }
 
     @PostMapping(value = "/cancel")
     @ResponseBody
-    public void cancelAttendance(@RequestBody Long motiveId){
-        service.cancelAttendance(Long.valueOf(motiveId));
+    public void cancelAttendance(@RequestBody Long motiveId) {
+        service.cancelMyAttendance(Long.valueOf(motiveId));
     }
 
 }
