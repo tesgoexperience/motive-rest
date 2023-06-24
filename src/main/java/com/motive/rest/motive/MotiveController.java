@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.motive.rest.dto.DTO;
 import com.motive.rest.motive.attendance.dto.StatsDTO;
 import com.motive.rest.motive.dto.CreateMotiveDTO;
-import com.motive.rest.motive.dto.MotiveBrowseDTO;
-import com.motive.rest.motive.dto.MotiveManageDTO;
+import com.motive.rest.motive.dto.MotiveDTO;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.stereotype.Controller;
@@ -31,13 +30,13 @@ public class MotiveController {
 
     @GetMapping(value = "/all")
     @ResponseBody
-    public List<MotiveBrowseDTO> browseMotives() {
+    public List<MotiveDTO> browseMotives() {
         return service.browseMotives();
     }
 
     @GetMapping(value = "/attending")
     @ResponseBody
-    public List<MotiveBrowseDTO> attending() {
+    public List<MotiveDTO> attending() {
         return service.getAttending();
     }
 
@@ -49,14 +48,14 @@ public class MotiveController {
 
     @GetMapping(value = "/managing")
     @ResponseBody
-    public List<MotiveManageDTO> managingMotives() {
+    public List<MotiveDTO> managingMotives() {
         return service.manageMotives();
     }
 
     @PostMapping(value = "/create")
     @ResponseBody //todo use manageDto rather than createMotiveDto here to make reduce repition for updates
-    public ResponseEntity<MotiveManageDTO> createMotive(@RequestBody CreateMotiveDTO motive) {
-        MotiveManageDTO dto = service.createMotive(motive.getTitle(), motive.getDescription(), motive.getStart(), motive.getAttendanceType(),
+    public ResponseEntity<MotiveDTO> createMotive(@RequestBody CreateMotiveDTO motive) {
+        MotiveDTO dto = service.createMotive(motive.getTitle(), motive.getDescription(), motive.getStart(), motive.getAttendanceType(),
                 motive.getSpecificallyInvited());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }

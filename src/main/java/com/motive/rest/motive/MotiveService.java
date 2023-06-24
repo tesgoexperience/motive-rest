@@ -1,17 +1,14 @@
 package com.motive.rest.motive;
 
 import com.motive.rest.Auth.AuthService;
-import com.motive.rest.dto.DTO;
 import com.motive.rest.dto.DTOFactory;
-import com.motive.rest.dto.DTOFactory.DTO_TYPE;
 import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.exceptions.UnauthorizedRequest;
 import com.motive.rest.motive.Invite.Invite;
 import com.motive.rest.motive.attendance.Attendance;
 import com.motive.rest.motive.attendance.AttendanceRepo;
 import com.motive.rest.motive.attendance.dto.StatsDTO;
-import com.motive.rest.motive.dto.MotiveBrowseDTO;
-import com.motive.rest.motive.dto.MotiveManageDTO;
+import com.motive.rest.motive.dto.MotiveDTO;
 import com.motive.rest.notification.NotificationService;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
@@ -60,7 +57,7 @@ public class MotiveService {
      * @param hiddenFrom  is the list of friends that shouldn't see this motive
      * @return a manageDTO generated from the created motive
      */
-    public MotiveManageDTO createMotive(String title, String description, Date start, Motive.ATTENDANCE_TYPE type,
+    public MotiveDTO createMotive(String title, String description, Date start, Motive.ATTENDANCE_TYPE type,
             String[] specificallyInvited) {
         User user = authService.getAuthUser();
 
@@ -85,9 +82,7 @@ public class MotiveService {
             notificationService.notify(invited, user.getUsername() + " has started a new motive", true);
         }
 
-        MotiveManageDTO motiveDto = (MotiveManageDTO) dtoFactory.getDto(motive, DTO_TYPE.MOTIVE_MANAGE);
-
-        return motiveDto;
+        return convertMotiveToDTO(motive);
     }
 
     /**
@@ -125,49 +120,45 @@ public class MotiveService {
         return motive.get();
     }
 
-    public DTO getMotiveDto(Long id) {
+    public MotiveDTO getMotiveDto(Long id) {
         Optional<Motive> motive = repo.findById(id);
         if (!motive.isPresent()) {
             throw new EntityNotFound("Could not find motive");
         }
 
         if (motive.get().getOwner().equals(authService.getAuthUser())) {
-            return dtoFactory.getDto(motive.get(), DTOFactory.DTO_TYPE.MOTIVE_MANAGE);
+            return convertMotiveToDTO(motive.get());
         }
         
-        if (!canAttend(motive.get())) {
-            return dtoFactory.getDto(repo.findById(id), DTOFactory.DTO_TYPE.MOTIVE_BROWSE);
+        if (canAttend(motive.get())) {
+            return convertMotiveToDTO(motive.get());
         } else {
             throw new UnauthorizedRequest("Forbidden from this action.");
         }
 
     }
 
-    @SuppressWarnings("unchecked")
-    public List<MotiveBrowseDTO> browseMotives() {
+    public List<MotiveDTO> browseMotives() {
         User user = authService.getAuthUser();
         // don't include the motives the user owns in the list
         List<Motive> motives = getActiveMotives().stream().filter(m -> !m.getOwner().equals(user))
                 .collect(Collectors.toList());
-
-        return (List<MotiveBrowseDTO>) dtoFactory.getDto(motives, DTO_TYPE.MOTIVE_BROWSE);
+        return convertMotiveToDTO(motives);
     }
 
-    @SuppressWarnings("unchecked")
-    public List<MotiveBrowseDTO> getAttending() {
+    public List<MotiveDTO> getAttending() {
         User user = authService.getAuthUser();
 
         List<Motive> motives = getActiveMotives().stream()
                 .filter(m -> attendanceRepo.findByMotiveAndUser(m, user).isPresent())
                 .collect(Collectors.toList());
-
-        return (List<MotiveBrowseDTO>) dtoFactory.getDto(motives, DTO_TYPE.MOTIVE_BROWSE);
+        
+        return convertMotiveToDTO(motives);
     }
 
-    @SuppressWarnings("unchecked")
-    public List<MotiveManageDTO> manageMotives() {
-        return (List<MotiveManageDTO>) dtoFactory.getDto(repo.findByOwner(authService.getAuthUser()),
-                DTO_TYPE.MOTIVE_MANAGE);
+    public List<MotiveDTO> manageMotives() {
+        List<Motive> motives = repo.findByOwner(authService.getAuthUser());
+        return convertMotiveToDTO(motives);
     }
 
     /**
@@ -223,4 +214,18 @@ public class MotiveService {
         ;
     }
 
+    public List<MotiveDTO> convertMotiveToDTO(List<Motive> motives){
+        List<MotiveDTO> dtos = new ArrayList<>();
+        for (Motive motive : motives) {
+            dtos.add(convertMotiveToDTO(motive));
+        }
+        return dtos;
+    }
+    
+    public MotiveDTO convertMotiveToDTO(Motive motive){
+        if (motive.getOwner().equals(authService.getAuthUser())) {
+            return new MotiveDTO(motive,true);
+        }
+        return new MotiveDTO(motive,false);
+    }
 }
