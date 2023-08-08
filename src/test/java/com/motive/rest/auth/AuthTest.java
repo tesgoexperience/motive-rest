@@ -1,4 +1,4 @@
-package com.motive.rest.Auth;
+package com.motive.rest.auth;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +21,6 @@ import com.motive.rest.util.SimpleResponse;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ActiveProfiles("test")
 @AutoConfigureMockMvc
 public class AuthTest {
 
@@ -90,7 +88,6 @@ public class AuthTest {
                 SimpleResponse response = mvcUtil.postRequest("/register", userTwo.toJSONString());
                 assertEquals(response.getStatus(), HttpStatus.BAD_REQUEST);
                 assertTrue(response.getBody().contains("username is already in use"));
-
         }
 
         @Test
