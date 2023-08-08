@@ -8,14 +8,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.motive.rest.Util.ServiceInterface;
 import com.motive.rest.dto.RegisterUser;
 import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 
 @Service
-public class AuthService implements ServiceInterface<AuthDetails> {
+public class AuthService  {
 
     @Autowired
     UserService userService;
@@ -45,21 +44,6 @@ public class AuthService implements ServiceInterface<AuthDetails> {
                 passwordEncoder.encode(userDetails.getPassword()), user);
         user.setAuthDetails(authDetails);
         userService.save(user);
-    }
-
-    @Override
-    public AuthDetails save(AuthDetails object) {
-        return repo.save(object);
-    }
-
-    @Override
-    public void delete(AuthDetails object) {
-        repo.delete(object);
-    }
-
-    @Override
-    public AuthDetails findById(UUID id) {
-        return repo.findById(id).orElseThrow();
     }
 
     public User getAuthUser() {

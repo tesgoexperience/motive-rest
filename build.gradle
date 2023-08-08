@@ -74,12 +74,10 @@ tasks.withType(Javadoc) {
     options.encoding = 'UTF-8'
 }
 
-tasks.named('test') {
-	useJUnitPlatform()
-}
-
 test {
+    useJUnitPlatform()
     systemProperty 'spring.profiles.active', 'test'
+    finalizedBy jacocoTestReport
 }
 
 jar {
