@@ -4,13 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.motive.rest.dto.DTO;
-import com.motive.rest.motive.Motive;
 import com.motive.rest.motive.Invite.Invite;
 import com.motive.rest.motive.attendance.Attendance;
 import com.motive.rest.motive.attendance.Attendance.ATTENDANCE_STATUS;
-import com.motive.rest.user.User;
-import lombok.NoArgsConstructor;
-
 public class ManagementDetails implements DTO {
 
     private List<Attendance> attendance;

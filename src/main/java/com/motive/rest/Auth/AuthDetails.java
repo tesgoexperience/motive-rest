@@ -40,7 +40,7 @@ public class AuthDetails implements UserDetails {
 
     private String email;
     private String password;
-    
+    private String notificationToken;
     private boolean accountNonExpired;
     private boolean accountNonLocked;
     private boolean isCredentialsNonExpired;
@@ -57,7 +57,7 @@ public class AuthDetails implements UserDetails {
         this.accountNonLocked = true;
         this.isCredentialsNonExpired  = true;
         this.isEnabled = true;
-
+        this.notificationToken = "";
         permissions = new String[]{"USER"};
     }
 

@@ -14,6 +14,8 @@ import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 import com.motive.rest.user.friendship.FriendshipService;
 
+import io.github.jav.exposerversdk.PushClientException;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -77,9 +79,15 @@ public class MotiveService {
 
         repo.save(motive);
 
+          try {
+                notificationService.notify(new User(), user.getUsername() + " has started a new motive", true);
+            } catch (PushClientException | InterruptedException e) {
+                e.printStackTrace();
+            }
+
         List<User> invitedUsers = getPotentialAttendees(motive);
         for (User invited : invitedUsers) {
-            notificationService.notify(invited, user.getUsername() + " has started a new motive", true);
+          
         }
 
         return convertMotiveToDTO(motive);

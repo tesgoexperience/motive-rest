@@ -7,6 +7,7 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.util.Date;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -31,13 +32,15 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode
 @JsonIgnoreType
 public class Notification {
+   
     enum NOTIFICATION_TYPE {
         EVENT,
         SOCIAL
     }
+
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Long id;
+    private UUID id;
     @ManyToOne
     private User recipient;
     private String message;

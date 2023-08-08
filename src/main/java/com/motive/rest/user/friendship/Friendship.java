@@ -1,10 +1,5 @@
 package com.motive.rest.user.friendship;
 
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.Entity;
 import com.motive.rest.user.User;
 
