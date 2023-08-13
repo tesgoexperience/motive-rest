@@ -75,4 +75,8 @@ public class SocialUtil {
                 friend.get("token").toString());
         return friend;
     }
+
+    public String getToken(JSONObject social) {
+        return ((JSONObject) social.get("user")).getAsString("token");
+    }
 }

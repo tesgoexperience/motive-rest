@@ -1,6 +1,7 @@
 package com.motive.rest.motive;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -60,10 +61,9 @@ public class MotiveController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-
     @GetMapping(value = "/get")
     @ResponseBody //todo use manageDto rather than createMotiveDto here to make reduce repition for updates
-    public ResponseEntity<DTO> getMotive(@RequestParam Long motive) {
+    public ResponseEntity<DTO> getMotive(@RequestParam UUID motive) {
         return new ResponseEntity<>(service.getMotiveDto(motive), HttpStatus.OK);
     }
 
@@ -74,4 +74,5 @@ public class MotiveController {
     //             motive.getSpecificallyInvited());
     //     return new ResponseEntity<>(dto, HttpStatus.OK);
     // }
+
 }

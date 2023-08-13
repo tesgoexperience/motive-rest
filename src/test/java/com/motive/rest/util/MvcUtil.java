@@ -27,7 +27,10 @@ public class MvcUtil {
     
     public SimpleResponse postRequest(String url, String body, String token)
             throws UnsupportedEncodingException, Exception {
-        return resultToSimpleResponse(mvc.perform(post(url).header("authorization", token)).andReturn());
+        return resultToSimpleResponse(mvc.perform(post(url)
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(body)
+        .header("authorization", token)).andReturn());
     }
 
     public SimpleResponse postRequest(String url, String body) throws UnsupportedEncodingException, Exception {

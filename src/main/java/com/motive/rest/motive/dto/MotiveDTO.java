@@ -3,6 +3,7 @@ package com.motive.rest.motive.dto;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import com.motive.rest.dto.DTO;
 import com.motive.rest.motive.Motive;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class MotiveDTO implements DTO{
-    @Getter private Long id;
+    @Getter private UUID id;
     @Getter private String title;
     @Getter private String description;
     @Getter private Date start;

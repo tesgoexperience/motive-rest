@@ -25,8 +25,11 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -43,9 +46,12 @@ public class Motive {
         EVERYONE, FRIENDS, SPECIFIC_FRIENDS
     }
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Id
-    private Long id;
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Type(type = "uuid-char")
+    private UUID id;
     private String title;
 
     @ManyToOne

@@ -2,6 +2,7 @@ package com.motive.rest.motive.attendance;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class AttendanceService {
     @Autowired
     FriendshipService friendshipService;
 
-    public void cancelMyAttendance(Long motiveId) {
+    public void cancelMyAttendance(UUID motiveId) {
         User user = authService.getAuthUser();
         Motive motive = motiveService.getMotive(motiveId);
 
@@ -64,7 +65,7 @@ public class AttendanceService {
         repo.delete(findByMotiveAndUser(response.getMotiveId(),user).get());
     }
 
-    public void requestAttendance(Long motiveId, boolean anonymous) {
+    public void requestAttendance(UUID motiveId, boolean anonymous) {
         User user = authService.getAuthUser();
         Motive motive = motiveService.getMotive(motiveId);
 
@@ -130,7 +131,7 @@ public class AttendanceService {
         }
     }
 
-    public List<AttendanceDTO> getPendingAttendance(Long motiveId) {
+    public List<AttendanceDTO> getPendingAttendance(UUID motiveId) {
         Motive motive = motiveService.getMotive(motiveId);
         motiveService.validateOwner(motive);
         return getPendingAttendance(motive);
@@ -147,13 +148,13 @@ public class AttendanceService {
         return repo.findByMotiveAndUser(motive, user).isPresent();
     }
 
-    public Optional<Attendance> findByMotiveAndUser(Long motiveId) {
+    public Optional<Attendance> findByMotiveAndUser(UUID motiveId) {
         return findByMotiveAndUser(motiveId, authService.getAuthUser());
     }
-    public Optional<Attendance> findByMotiveAndUser(Long motiveId, User user) {
+    public Optional<Attendance> findByMotiveAndUser(UUID motiveId, User user) {
         return repo.findByMotiveAndUser(motiveService.getMotive(motiveId), user);
     }
-    public AttendanceDTO motiveAttendance(Long motiveId) {
+    public AttendanceDTO motiveAttendance(UUID motiveId) {
         Optional<Attendance> att = findByMotiveAndUser(motiveId);
         if (att.isPresent()) {
             return (AttendanceDTO) dtoFactory.getDto(

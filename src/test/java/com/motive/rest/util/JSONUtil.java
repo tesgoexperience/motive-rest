@@ -1,5 +1,9 @@
 package com.motive.rest.util;
 
+import java.text.SimpleDateFormat;
+import java.util.concurrent.TimeUnit;
+
+import com.nimbusds.jose.shaded.json.JSONArray;
 
 import net.datafaker.Faker;
 import net.minidev.json.JSONObject;
@@ -10,7 +14,7 @@ public class JSONUtil {
     private Faker faker = new Faker();
     private JSONParser parser = new JSONParser(JSONParser.MODE_JSON_SIMPLE);
 
-    public JSONObject userObject(){
+    public JSONObject userObject() {
         JSONObject user = new JSONObject();
 
         user.put("username", faker.name().username());
@@ -21,7 +25,19 @@ public class JSONUtil {
         return user;
     }
 
-    public JSONObject toJsonObject(String jsonString) throws ParseException{
-        return (JSONObject)parser.parse(jsonString);
+    public JSONObject motiveObject(String attendanceType) {
+        JSONObject motive = new JSONObject();
+        motive.appendField("title", faker.eldenRing().skill());
+        motive.appendField("description", faker.bojackHorseman().quotes());
+        motive.appendField("attendanceType", attendanceType);
+        motive.appendField("specificallyInvited", new JSONArray());
+        motive.put("start",
+                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(faker.date().future(1, TimeUnit.DAYS)));
+
+        return motive;
+    }
+
+    public JSONObject toJsonObject(String jsonString) throws ParseException {
+        return (JSONObject) parser.parse(jsonString);
     }
 }

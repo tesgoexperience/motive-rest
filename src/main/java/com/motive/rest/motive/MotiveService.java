@@ -2,6 +2,7 @@ package com.motive.rest.motive;
 
 import com.motive.rest.Auth.AuthService;
 import com.motive.rest.dto.DTOFactory;
+import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.exceptions.UnauthorizedRequest;
 import com.motive.rest.motive.Invite.Invite;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,13 @@ public class MotiveService {
      */
     public MotiveDTO createMotive(String title, String description, Date start, Motive.ATTENDANCE_TYPE type,
             String[] specificallyInvited) {
+
+        // check motive date in the future
+        if (start.before(new Date())) {
+            throw new BadUserInput("Start date cannot be in the past.");
+        }
+
+
         User user = authService.getAuthUser();
 
         Motive motive = new Motive(
@@ -112,7 +121,7 @@ public class MotiveService {
         return allFriends;
     }
 
-    public Motive getMotive(Long id) {
+    public Motive getMotive(UUID id) {
         Optional<Motive> motive = repo.findById(id);
         if (!motive.isPresent()) {
             throw new EntityNotFound("Could not find motive");
@@ -120,7 +129,7 @@ public class MotiveService {
         return motive.get();
     }
 
-    public MotiveDTO getMotiveDto(Long id) {
+    public MotiveDTO getMotiveDto(UUID id) {
         Optional<Motive> motive = repo.findById(id);
         if (!motive.isPresent()) {
             throw new EntityNotFound("Could not find motive");
@@ -129,7 +138,7 @@ public class MotiveService {
         if (motive.get().getOwner().equals(authService.getAuthUser())) {
             return convertMotiveToDTO(motive.get());
         }
-        
+
         if (canAttend(motive.get())) {
             return convertMotiveToDTO(motive.get());
         } else {
@@ -152,7 +161,7 @@ public class MotiveService {
         List<Motive> motives = getActiveMotives().stream()
                 .filter(m -> attendanceRepo.findByMotiveAndUser(m, user).isPresent())
                 .collect(Collectors.toList());
-        
+
         return convertMotiveToDTO(motives);
     }
 
@@ -214,18 +223,15 @@ public class MotiveService {
         ;
     }
 
-    public List<MotiveDTO> convertMotiveToDTO(List<Motive> motives){
+    public List<MotiveDTO> convertMotiveToDTO(List<Motive> motives) {
         List<MotiveDTO> dtos = new ArrayList<>();
         for (Motive motive : motives) {
             dtos.add(convertMotiveToDTO(motive));
         }
         return dtos;
     }
-    
-    public MotiveDTO convertMotiveToDTO(Motive motive){
-        if (motive.getOwner().equals(authService.getAuthUser())) {
-            return new MotiveDTO(motive,true);
-        }
-        return new MotiveDTO(motive,false);
+
+    public MotiveDTO convertMotiveToDTO(Motive motive) {
+        return new MotiveDTO(motive, motive.getOwner().equals(authService.getAuthUser()));
     }
 }

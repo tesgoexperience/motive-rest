@@ -2,6 +2,7 @@ package com.motive.rest.motive.attendance;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,19 +30,19 @@ public class AttendanceController {
     @PostMapping(value = "/request")
     @ResponseBody
     public void requestAttendance(@RequestBody Map<String, String> req) {
-        service.requestAttendance(Long.valueOf(req.get("motive")), req.get("anonymous").equals("true"));
+        service.requestAttendance(UUID.fromString(req.get("motive")), req.get("anonymous").equals("true"));
     }
 
     @GetMapping(value = "/pending")
     @ResponseBody
-    public List<AttendanceDTO> getAllPendingRequests(@RequestParam String motiveId) { // todo move to body
-        return service.getPendingAttendance(Long.valueOf(motiveId));
+    public List<AttendanceDTO> getAllPendingRequests(@RequestParam UUID motiveId) { // todo move to body
+        return service.getPendingAttendance(motiveId);
     }
 
     @GetMapping(value = "/")
     @ResponseBody
-    public AttendanceDTO getAttendanceForMotive(@RequestParam String motiveId) {
-        return service.motiveAttendance(Long.valueOf(motiveId));
+    public AttendanceDTO getAttendanceForMotive(@RequestParam UUID motiveId) {
+        return service.motiveAttendance(motiveId);
     }
 
     @PostMapping(value = "/accept")
@@ -64,8 +65,8 @@ public class AttendanceController {
 
     @PostMapping(value = "/cancel")
     @ResponseBody
-    public void cancelAttendance(@RequestBody Long motiveId) {
-        service.cancelMyAttendance(Long.valueOf(motiveId));
+    public void cancelAttendance(@RequestBody UUID motiveId) {
+        service.cancelMyAttendance(motiveId);
     }
 
 }
