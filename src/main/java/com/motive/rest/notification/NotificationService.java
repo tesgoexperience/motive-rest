@@ -24,77 +24,76 @@ import io.github.jav.exposerversdk.PushClientException;
 public class NotificationService {
 
     @Autowired
-    private UserService userService;
-    @Autowired
-    private NotificationRepo repo;
-    @Autowired
     AuthService authService;
 
-    // get unacknowledged notifications
-    public List<Notification> getUnacknowledgedNotifications() {
-        return repo.findByRecipientAndAcknowledged(authService.getAuthUser(), false);
-    }
-
     // creates a new notification
-    public void notify(User user, String message,boolean push) throws PushClientException, InterruptedException {
-        String recipient = "ExponentPushToken[Xxx4n3NM4z2Rt5GuMT3KZT]";
+    public void notify(String title, String body, String token) {
+        if (token == null || token.isEmpty()) {
+            return;
+        }
 
-        if (!PushClient.isExponentPushToken(recipient))
-            throw new Error("Token:" + recipient + " is not a valid token.");
+        if (!PushClient.isExponentPushToken(token))
+            throw new Error("Token:" + token + " is not a valid token.");
 
         ExpoPushMessage expoPushMessage = new ExpoPushMessage();
-        expoPushMessage.getTo().add(recipient);
-        expoPushMessage.setTitle("test notification");
-        expoPushMessage.setBody("this is a test notification");
+        expoPushMessage.getTo().add(token);
+        expoPushMessage.setTitle(title);
+        expoPushMessage.setBody(body);
 
         List<ExpoPushMessage> expoPushMessages = new ArrayList<>();
         expoPushMessages.add(expoPushMessage);
 
-        PushClient client = new PushClient();
-        List<List<ExpoPushMessage>> chunks = client.chunkPushNotifications(expoPushMessages);
+        try {
+            PushClient client = new PushClient();
 
-        List<CompletableFuture<List<ExpoPushTicket>>> messageRepliesFutures = new ArrayList<>();
+            List<List<ExpoPushMessage>> chunks = client.chunkPushNotifications(expoPushMessages);
 
-        for (List<ExpoPushMessage> chunk : chunks) {
-            messageRepliesFutures.add(client.sendPushNotificationsAsync(chunk));
-        }
+            List<CompletableFuture<List<ExpoPushTicket>>> messageRepliesFutures = new ArrayList<>();
 
-        // Wait for each completable future to finish
-        List<ExpoPushTicket> allTickets = new ArrayList<>();
-        for (CompletableFuture<List<ExpoPushTicket>> messageReplyFuture : messageRepliesFutures) {
-            try {
-                for (ExpoPushTicket ticket : messageReplyFuture.get()) {
-                    allTickets.add(ticket);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
+            for (List<ExpoPushMessage> chunk : chunks) {
+                messageRepliesFutures.add(client.sendPushNotificationsAsync(chunk));
             }
+
+            // Wait for each completable future to finish
+            List<ExpoPushTicket> allTickets = new ArrayList<>();
+            for (CompletableFuture<List<ExpoPushTicket>> messageReplyFuture : messageRepliesFutures) {
+                try {
+                    for (ExpoPushTicket ticket : messageReplyFuture.get()) {
+                        allTickets.add(ticket);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            List<ExpoPushMessageTicketPair<ExpoPushMessage>> zippedMessagesTickets = client
+                    .zipMessagesTickets(expoPushMessages, allTickets);
+
+            List<ExpoPushMessageTicketPair<ExpoPushMessage>> okTicketMessages = client
+                    .filterAllSuccessfulMessages(zippedMessagesTickets);
+            String okTicketMessagesString = okTicketMessages.stream().map(
+                    p -> "Title: " + p.message.getTitle() + ", Id:" + p.ticket.getId())
+                    .collect(Collectors.joining(","));
+            System.out.println(
+                    "Recieved OK ticket for " +
+                            okTicketMessages.size() +
+                            " messages: " + okTicketMessagesString);
+
+            List<ExpoPushMessageTicketPair<ExpoPushMessage>> errorTicketMessages = client
+                    .filterAllMessagesWithError(zippedMessagesTickets);
+            String errorTicketMessagesString = errorTicketMessages.stream().map(
+                    p -> "Title: " + p.message.getTitle() + ", Error: " + p.ticket.getDetails().getError())
+                    .collect(Collectors.joining(","));
+            System.out.println(
+                    "Recieved ERROR ticket for " +
+                            errorTicketMessages.size() +
+                            " messages: " +
+                            errorTicketMessagesString);
+        } catch (PushClientException e) {
+            e.printStackTrace();
         }
-
-        List<ExpoPushMessageTicketPair<ExpoPushMessage>> zippedMessagesTickets = client.zipMessagesTickets(expoPushMessages, allTickets);
-
-        List<ExpoPushMessageTicketPair<ExpoPushMessage>> okTicketMessages = client.filterAllSuccessfulMessages(zippedMessagesTickets);
-        String okTicketMessagesString = okTicketMessages.stream().map(
-                p -> "Title: " + p.message.getTitle() + ", Id:" + p.ticket.getId()
-        ).collect(Collectors.joining(","));
-        System.out.println(
-                "Recieved OK ticket for " +
-                        okTicketMessages.size() +
-                        " messages: " + okTicketMessagesString
-        );
-
-        List<ExpoPushMessageTicketPair<ExpoPushMessage>> errorTicketMessages = client.filterAllMessagesWithError(zippedMessagesTickets);
-        String errorTicketMessagesString = errorTicketMessages.stream().map(
-                p -> "Title: " + p.message.getTitle() + ", Error: " + p.ticket.getDetails().getError()
-        ).collect(Collectors.joining(","));
-        System.out.println(
-                "Recieved ERROR ticket for " +
-                        errorTicketMessages.size() +
-                        " messages: " +
-                        errorTicketMessagesString
-        );
     }
 
 }

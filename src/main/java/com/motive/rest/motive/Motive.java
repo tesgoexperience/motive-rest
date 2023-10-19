@@ -40,7 +40,7 @@ import java.util.Date;
 public class Motive {
 
     public enum ATTENDANCE_TYPE {
-        EVERYONE, FRIENDS, SPECIFIC_FRIENDS
+        EVERYONE/* TODO Change to friends of friends or change to friends of friends*/, FRIENDS, SPECIFIC_FRIENDS
     }
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
