@@ -3,10 +3,12 @@ package com.motive.rest.Auth;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.motive.rest.dto.RegisterUser;
@@ -34,4 +36,10 @@ public class AuthController {
         service.createUser(createUser);
     }
     
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping(value = "/notification/add-token")
+    @ResponseBody
+    public boolean registerToken(@RequestBody String token) {
+        return service.saveToken(token);
+    }
 }

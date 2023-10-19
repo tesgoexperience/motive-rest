@@ -18,6 +18,7 @@ import com.motive.rest.motive.Invite.Invite;
 import com.motive.rest.motive.attendance.Attendance.ATTENDANCE_STATUS;
 import com.motive.rest.motive.attendance.dto.AttendanceDTO;
 import com.motive.rest.motive.attendance.dto.AttendanceResponseDto;
+import com.motive.rest.notification.NotificationService;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 import com.motive.rest.user.friendship.FriendshipService;
@@ -37,6 +38,8 @@ public class AttendanceService {
     AuthService authService;
     @Autowired
     FriendshipService friendshipService;
+    @Autowired
+    private NotificationService notificationService;
 
     public void cancelMyAttendance(Long motiveId) {
         User user = authService.getAuthUser();
@@ -47,6 +50,7 @@ public class AttendanceService {
         }
 
         repo.delete(findByMotiveAndUser(motiveId).get());
+        notificationService.notify(motive.getTitle(), user.getUsername()+" is no longer attending", motive.getOwner().getAuthDetails().getNotificationToken());
     }
 
     public void removeAttendee(AttendanceResponseDto response) {
@@ -55,13 +59,13 @@ public class AttendanceService {
 
         // throws error if this user is not the owner
         motiveService.validateOwner(motive);
-            
         
         if (!hasAttendance(user, motive)) {
             throw new IllogicalRequest("User is not attending this motive.");
         }
 
         repo.delete(findByMotiveAndUser(response.getMotiveId(),user).get());
+        notificationService.notify(motive.getTitle(), "You have been removed from the motive", user.getAuthDetails().getNotificationToken());
     }
 
     public void requestAttendance(Long motiveId, boolean anonymous) {
@@ -97,6 +101,7 @@ public class AttendanceService {
 
         Attendance attendance = new Attendance(user, motive, anonymous);
         repo.save(attendance);
+        notificationService.notify(motive.getTitle(), "New attendance request", motive.getOwner().getAuthDetails().getNotificationToken());
     }
 
     public void respondToAttendanceRequest(AttendanceResponseDto response, boolean accept) {
@@ -125,6 +130,7 @@ public class AttendanceService {
         if (accept) {
             attendance.setStatus(ATTENDANCE_STATUS.CONFIRMED);
             repo.save(attendance);
+            notificationService.notify(attendance.getMotive().getTitle(), "Request accepted!", attendance.getUser().getAuthDetails().getNotificationToken());
         } else {
             repo.delete(attendance);
         }

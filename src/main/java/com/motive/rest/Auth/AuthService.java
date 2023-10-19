@@ -62,6 +62,12 @@ public class AuthService implements ServiceInterface<AuthDetails> {
         return repo.findById(id).orElseThrow();
     }
 
+	public boolean saveToken(String token) {
+		AuthDetails authDetails = getAuthUser().getAuthDetails();
+        authDetails.setNotificationToken(token);
+        repo.save(authDetails);
+        return true;
+	}
     public User getAuthUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return repo.findByEmail(authentication.getName()).orElseThrow().getOwner();

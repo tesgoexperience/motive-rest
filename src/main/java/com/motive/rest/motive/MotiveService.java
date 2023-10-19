@@ -14,6 +14,8 @@ import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 import com.motive.rest.user.friendship.FriendshipService;
 
+import io.github.jav.exposerversdk.PushClientException;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -77,9 +79,11 @@ public class MotiveService {
 
         repo.save(motive);
 
+        // notify all potential attendees
         List<User> invitedUsers = getPotentialAttendees(motive);
         for (User invited : invitedUsers) {
-            notificationService.notify(invited, user.getUsername() + " has started a new motive", true);
+            notificationService.notify("New motive from " + user.getUsername(), motive.getTitle(),
+                    invited.getAuthDetails().getNotificationToken());
         }
 
         return convertMotiveToDTO(motive);
@@ -129,7 +133,7 @@ public class MotiveService {
         if (motive.get().getOwner().equals(authService.getAuthUser())) {
             return convertMotiveToDTO(motive.get());
         }
-        
+
         if (canAttend(motive.get())) {
             return convertMotiveToDTO(motive.get());
         } else {
@@ -152,7 +156,7 @@ public class MotiveService {
         List<Motive> motives = getActiveMotives().stream()
                 .filter(m -> attendanceRepo.findByMotiveAndUser(m, user).isPresent())
                 .collect(Collectors.toList());
-        
+
         return convertMotiveToDTO(motives);
     }
 
@@ -214,18 +218,18 @@ public class MotiveService {
         ;
     }
 
-    public List<MotiveDTO> convertMotiveToDTO(List<Motive> motives){
+    public List<MotiveDTO> convertMotiveToDTO(List<Motive> motives) {
         List<MotiveDTO> dtos = new ArrayList<>();
         for (Motive motive : motives) {
             dtos.add(convertMotiveToDTO(motive));
         }
         return dtos;
     }
-    
-    public MotiveDTO convertMotiveToDTO(Motive motive){
+
+    public MotiveDTO convertMotiveToDTO(Motive motive) {
         if (motive.getOwner().equals(authService.getAuthUser())) {
-            return new MotiveDTO(motive,true);
+            return new MotiveDTO(motive, true);
         }
-        return new MotiveDTO(motive,false);
+        return new MotiveDTO(motive, false);
     }
 }
