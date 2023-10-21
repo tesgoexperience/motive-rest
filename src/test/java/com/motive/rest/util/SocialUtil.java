@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.nimbusds.jose.shaded.json.JSONArray;
+import net.minidev.json.JSONArray;
 
 import net.minidev.json.JSONObject;
 

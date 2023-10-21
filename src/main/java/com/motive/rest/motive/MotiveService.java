@@ -6,7 +6,6 @@ import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.exceptions.UnauthorizedRequest;
 import com.motive.rest.motive.Invite.Invite;
-import com.motive.rest.motive.attendance.Attendance;
 import com.motive.rest.motive.attendance.AttendanceRepo;
 import com.motive.rest.motive.attendance.dto.StatsDTO;
 import com.motive.rest.motive.dto.MotiveDTO;
@@ -67,7 +66,6 @@ public class MotiveService {
             throw new BadUserInput("Start date cannot be in the past.");
         }
 
-
         User user = authService.getAuthUser();
 
         Motive motive = new Motive(
@@ -86,39 +84,21 @@ public class MotiveService {
 
         repo.save(motive);
 
-        List<User> invitedUsers = getPotentialAttendees(motive);
-        for (User invited : invitedUsers) {
-            notificationService.notify(invited, user.getUsername() + " has started a new motive", true);
-        }
-
-        return convertMotiveToDTO(motive);
-    }
-
-    /**
-     * Get the list of friends who are not in the hidden from list, have no
-     * rejected, pending or confirmed attendances
-     * 
-     * @param motive
-     * @return the remaining friends after subtraction
-     */
-    public List<User> getPotentialAttendees(Motive motive) {
+        // notify all potential attendees for the new motive
         List<User> allFriends = new ArrayList<>();
 
         if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.SPECIFIC_FRIENDS)) {
             allFriends.addAll(
                     motive.getSpecificallyInvited().stream().map(e -> e.getUser()).collect(Collectors.toList()));
         } else if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.FRIENDS)) {
-            for (User friend : friendshipService.getFriends()) {
-                allFriends.add(friend);
-            }
+            allFriends.addAll(friendshipService.getFriends());
         }
 
-        // remove all the friends that already have an attendance status
-        for (Attendance attendance : motive.getAttendance()) {
-            allFriends.remove(attendance.getUser());
+        for (User invited : allFriends) {
+            notificationService.notify(invited, user.getUsername() + " has started a new motive", true);
         }
 
-        return allFriends;
+        return convertMotiveToDTO(motive);
     }
 
     public Motive getMotive(UUID id) {
@@ -178,15 +158,9 @@ public class MotiveService {
      */
     private List<Motive> getActiveMotives() {
 
-        List<Motive> potentialMotive = new ArrayList<>();
         List<Motive> AllMotives = repo.findByFinished(false);
-        for (Motive motive : AllMotives) {
-            if (canAttend(motive)) {
-                potentialMotive.add(motive);
-            }
-        }
-
-        return potentialMotive;
+        AllMotives.removeIf(motive -> !canAttend(motive));
+        return AllMotives;
     }
 
     /**
@@ -219,8 +193,7 @@ public class MotiveService {
     public void validateOwner(Motive motive) {
         if (!motive.getOwner().equals(authService.getAuthUser())) {
             throw new UnauthorizedRequest("Forbidden from this action.");
-        }
-        ;
+        };
     }
 
     public List<MotiveDTO> convertMotiveToDTO(List<Motive> motives) {
