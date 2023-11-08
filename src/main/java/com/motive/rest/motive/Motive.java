@@ -60,14 +60,14 @@ public class Motive {
     @Column(name = "description", length = 50000)
     private String description;
     private Date start;
-
+    private Date end;
     @OneToMany(mappedBy = "motive")
     private List<Attendance> attendance;
 
     @OneToMany(mappedBy = "motive", cascade = CascadeType.ALL)
     private List<Invite> specificallyInvited;
 
-    private boolean finished;
+    private boolean cancelled;
 
     private ATTENDANCE_TYPE attendanceType;
 
@@ -76,14 +76,15 @@ public class Motive {
     @Column(name = "create_date")
     private Date createDate;
 
-    public Motive(User owner, String title, String description, Date start, ATTENDANCE_TYPE type) {
+    public Motive(User owner, String title, String description, Date start, Date end, ATTENDANCE_TYPE type) {
         this.owner = owner;
         this.title = title;
         this.description = description;
         this.start = start;
+        this.end = end;
         this.attendance = new ArrayList<>();
         this.specificallyInvited = new ArrayList<>();
-        this.finished = false;
+        this.cancelled = false;
         this.attendanceType = type;
     }
 }

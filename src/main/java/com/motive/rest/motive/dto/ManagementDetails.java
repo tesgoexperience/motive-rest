@@ -18,6 +18,11 @@ public class ManagementDetails implements DTO {
         this.specificallyInvited = specificallyInvited;
     }
 
+    public ManagementDetails() {
+        this.attendance = new ArrayList<Attendance>();
+        this.specificallyInvited = new ArrayList<>();
+    }
+
     public List<String> getRequests() {
         List<String> requesterUsernames = new ArrayList<>();
         for (Attendance att : attendance) {

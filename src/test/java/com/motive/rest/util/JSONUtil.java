@@ -45,6 +45,8 @@ public class JSONUtil {
         JSONObject motive = new JSONObject();
         motive.put("start",
                 new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(faker.date().future(1, TimeUnit.DAYS)));
+        motive.put("end",
+                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(faker.date().future(5,2, TimeUnit.DAYS)));                
         motive.appendField("title", faker.eldenRing().skill());
         motive.appendField("description", faker.bojackHorseman().quotes());
         return motive;

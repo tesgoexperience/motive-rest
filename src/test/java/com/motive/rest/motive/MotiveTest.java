@@ -59,7 +59,7 @@ public class MotiveTest {
 		// create a motive
 		SimpleResponse res = mvcUtil.postRequest("/motive/create/",
 				json.motiveObject("FRIENDS").toJSONString(), token);
-		String motiveId = res.getBodyAsJson().getAsString("id");
+ 		String motiveId = res.getBodyAsJson().getAsString("id");
 
 		// request motive as friend
 		JSONObject request = new JSONObject();
@@ -90,6 +90,21 @@ public class MotiveTest {
 		assertTrue(res.getBody().contains("Start date cannot be in the past"));
 	}
 
+	@Test
+	public void MotiveEndDateBeforeStart() throws UnsupportedEncodingException, Exception {
+		String token = socialUtil.getToken(social);
+		JSONObject motive = json.motiveObject("FRIENDS");
+		motive.put("start",
+				new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
+						.format(faker.date().future(4, 3, TimeUnit.DAYS)));
+		motive.put("end",
+				new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
+						.format(faker.date().future(2, 1, TimeUnit.DAYS)));
+
+		SimpleResponse res = mvcUtil.postRequest("/motive/create/", motive.toJSONString(), token);
+		assertEquals(res.getStatus(), HttpStatus.BAD_REQUEST);
+		assertTrue(res.getBody().contains("end date cannot before start"));
+	}
 	// This test check if a friend is able to view a motive posted by their friend
 	@Test
 	public void ViewMotiveOpenToOnlyFriends() throws UnsupportedEncodingException, Exception {
@@ -150,5 +165,5 @@ public class MotiveTest {
 	 	assertEquals(1L, mvcUtil.getRequest("/motive/stats", token).getBodyAsJson().getAsNumber("attending"));
 	}
 
-	// todo test stats for finished motive
+
 }

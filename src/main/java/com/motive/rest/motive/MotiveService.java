@@ -58,12 +58,15 @@ public class MotiveService {
      * @param hiddenFrom  is the list of friends that shouldn't see this motive
      * @return a manageDTO generated from the created motive
      */
-    public MotiveDTO createMotive(String title, String description, Date start, Motive.ATTENDANCE_TYPE type,
+    public MotiveDTO createMotive(String title, String description, Date start, Date end, Motive.ATTENDANCE_TYPE type,
             String[] specificallyInvited) {
 
         // check motive date in the future
         if (start.before(new Date())) {
             throw new BadUserInput("Start date cannot be in the past.");
+        }
+        if (end.before(start)) {
+            throw new BadUserInput("end date cannot before start.");
         }
 
         User user = authService.getAuthUser();
@@ -73,6 +76,7 @@ public class MotiveService {
                 title,
                 description,
                 start,
+                end,
                 type);
 
         if (type.equals(Motive.ATTENDANCE_TYPE.SPECIFIC_FRIENDS)) {
@@ -146,7 +150,7 @@ public class MotiveService {
     }
 
     public List<MotiveDTO> manageMotives() {
-        List<Motive> motives = repo.findByOwner(authService.getAuthUser());
+        List<Motive> motives = repo.findByOngoingWithOwner(authService.getAuthUser().getId().toString());
         return convertMotiveToDTO(motives);
     }
 
@@ -158,9 +162,27 @@ public class MotiveService {
      */
     private List<Motive> getActiveMotives() {
 
-        List<Motive> AllMotives = repo.findByFinished(false);
+        List<Motive> AllMotives = repo.findByOngoing();
         AllMotives.removeIf(motive -> !canAttend(motive));
         return AllMotives;
+    }
+
+    /**
+     * get all finished motives this user has finished or managed
+     * 
+     */
+    public List<MotiveDTO> getPastMotives() {
+        User user = authService.getAuthUser();
+        List<Motive> pastMotives = repo.findByFinishedOrCancelled();
+        List<Motive> usersPastMotives = new ArrayList<>();
+
+        for (Motive motive : pastMotives) { // todo move this to an sql query to make scalable
+            if (motive.getOwner().equals(user) || attendanceRepo.findByMotiveAndUser(motive, user).isPresent()) {
+                usersPastMotives.add(motive);
+            }
+        }
+
+        return convertMotiveToDTO(usersPastMotives);
     }
 
     /**
@@ -169,8 +191,7 @@ public class MotiveService {
      * @return whether or not this user can attend this motive
      */
     private boolean canAttend(Motive motive) {
-        if (motive.getOwner().equals(authService.getAuthUser())
-                || motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.EVERYONE)) {
+        if (motive.getOwner().equals(authService.getAuthUser())) {
             return true;
         }
 
@@ -187,13 +208,15 @@ public class MotiveService {
     }
 
     public StatsDTO getStats() {
-        return new StatsDTO(getAttending().size() + manageMotives().size(), 0, getActiveMotives().size());
+        return new StatsDTO(getAttending().size() + manageMotives().size(), getPastMotives().size(),
+                getActiveMotives().size());
     }
 
     public void validateOwner(Motive motive) {
         if (!motive.getOwner().equals(authService.getAuthUser())) {
             throw new UnauthorizedRequest("Forbidden from this action.");
-        };
+        }
+        ;
     }
 
     public List<MotiveDTO> convertMotiveToDTO(List<Motive> motives) {
@@ -204,7 +227,11 @@ public class MotiveService {
         return dtos;
     }
 
-    public MotiveDTO convertMotiveToDTO(Motive motive) {
-        return new MotiveDTO(motive, motive.getOwner().equals(authService.getAuthUser()));
+    public boolean isOngoing(Motive motive) {
+        return !(motive.isCancelled() || motive.getEnd().before(new Date()));
+    }
+
+     public MotiveDTO convertMotiveToDTO(Motive motive) {
+        return new MotiveDTO(motive, isOngoing(motive) && motive.getOwner().equals(authService.getAuthUser()));
     }
 }
