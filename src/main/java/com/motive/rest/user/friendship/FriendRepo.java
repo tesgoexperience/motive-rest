@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import java.util.UUID;
+
 
 public interface FriendRepo extends CrudRepository<Friendship, Long>{
     @Query(value="SELECT * FROM friendship WHERE approved=true AND (receiver_id=?1 OR sender_id=?1)", nativeQuery = true)
