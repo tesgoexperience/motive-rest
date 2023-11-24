@@ -11,12 +11,15 @@ import com.motive.rest.user.dto.SearchResultDTO.USER_RELATIONSHIP;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.motive.rest.exceptions.IllogicalRequest;
 import com.motive.rest.Auth.AuthService;
+import com.motive.rest.chat.Chat;
+import com.motive.rest.chat.ChatRepo;
 import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.exceptions.EntityNotFound;
 
@@ -28,6 +31,9 @@ public class FriendshipService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ChatRepo chatRepo;
 
     @Autowired
     private FriendRepo repo;
@@ -70,16 +76,19 @@ public class FriendshipService {
     private List<User> extractFriends(List<Friendship> friendships){
         List<User> friends = new ArrayList<>();
         for (Friendship friendship : friendships) {
-            if (friendship.getSender().equals(authService.getAuthUser())) {
-                friends.add(friendship.getReceiver());
-            } else {
-                friends.add(friendship.getSender());
-            }
+            friends.add(extractFriend(friendship));
         }
 
         return friends;
     }
-
+    
+    public User extractFriend(Friendship friendship){
+        if (friendship.getSender().equals(authService.getAuthUser())) {
+         return friendship.getReceiver();
+        } else {
+         return friendship.getSender();
+        }
+    }
     /**
      * if the context user is not friends with this user, throw an error
      * @param username of the friend we are checking against
@@ -142,6 +151,8 @@ public class FriendshipService {
         if (accept) {
             request.setApproved(true);
             repo.save(request);
+            chatRepo.save(new Chat(new ArrayList<>(Arrays.asList(friend, user)), request));
+
         } else {
             repo.delete(request);
         }

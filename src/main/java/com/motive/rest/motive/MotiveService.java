@@ -1,6 +1,7 @@
 package com.motive.rest.motive;
 
 import com.motive.rest.Auth.AuthService;
+import com.motive.rest.chat.Chat;
 import com.motive.rest.dto.DTOFactory;
 import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.exceptions.EntityNotFound;
@@ -78,7 +79,9 @@ public class MotiveService {
                 start,
                 end,
                 type);
-
+        
+        motive.setChat(new Chat(new ArrayList<>(), motive));
+        
         if (type.equals(Motive.ATTENDANCE_TYPE.SPECIFIC_FRIENDS)) {
             for (String username : specificallyInvited) {
                 friendshipService.validateFriendship(username);
