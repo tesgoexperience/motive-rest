@@ -1,6 +1,7 @@
 package com.motive.rest.util;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Random;
 
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -78,5 +79,9 @@ public class SocialUtil {
 
     public String getToken(JSONObject social) {
         return ((JSONObject) social.get("user")).getAsString("token");
+    }
+    public JSONObject getFriend(JSONObject social) {
+        JSONArray friends = (JSONArray) social.get("friends");
+        return (JSONObject)friends.get(new Random().nextInt(friends.size()));
     }
 }
