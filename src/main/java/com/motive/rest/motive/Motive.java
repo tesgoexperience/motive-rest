@@ -78,7 +78,7 @@ public class Motive {
     @Column(name = "create_date")
     private Date createDate;
 
-    @OneToOne
+    @OneToOne(mappedBy = "belongsToMotive")
     private Chat chat;
 
     public Motive(User owner, String title, String description, Date start, Date end, ATTENDANCE_TYPE type) {

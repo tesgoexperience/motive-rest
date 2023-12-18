@@ -1,4 +1,6 @@
-package com.motive.rest.chat;
+package com.motive.rest.chat.message;
+
+import java.util.Date;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -6,12 +8,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.motive.rest.chat.Chat;
 import com.motive.rest.user.User;
 
 import lombok.Getter;
@@ -37,10 +42,15 @@ public class Message {
     @ManyToOne
     Chat chat;
     @Lob
-    @Column(name = "description", length = 20000)
+    @Column(name = "content", length = 20000)
     String content;
     @ManyToOne
     User sender;
+    @CreationTimestamp
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "create_date")
+    private Date createDate;
+
     public Message(Chat chat, String content, User sender) {
         this.chat = chat;
         this.content = content;

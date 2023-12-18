@@ -1,25 +1,31 @@
 package com.motive.rest.chat;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 
-import com.motive.rest.chat.Message;
 import com.motive.rest.chat.dto.ChatPreviewDTO;
+import com.motive.rest.chat.message.Message;
+import com.motive.rest.chat.message.MessageRepo;
+import com.motive.rest.chat.message.dto.MessageDTO;
 import com.motive.rest.exceptions.BadUserInput;
+import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.exceptions.UnauthorizedRequest;
+import com.motive.rest.motive.Motive;
+import com.motive.rest.motive.MotiveService;
 import com.motive.rest.Auth.AuthService;
 import com.motive.rest.user.User;
-import com.motive.rest.user.UserRepo;
 import com.motive.rest.user.UserService;
-import com.motive.rest.user.friendship.FriendRepo;
 import com.motive.rest.user.friendship.Friendship;
 import com.motive.rest.user.friendship.FriendshipService;
+import java.util.stream.Collectors;
 
 @Component
 public class ChatService {
@@ -29,51 +35,86 @@ public class ChatService {
     @Autowired
     AuthService authService;
     @Autowired
-    FriendshipService service;
+    FriendshipService friendshipService;
+    @Autowired
+    UserService userService;
+    @Autowired
+    MotiveService motiveService;
+    @Autowired
+    MessageRepo messageRepo;
 
     public List<ChatPreviewDTO> getChatPreview() {
         User user = authService.getAuthUser();
 
         List<Chat> getAllChats = repo.getChats(user.getId().toString());
+
+        // put the chats this user is not upto date with first
+        List<Chat> sortedChat = getAllChats.stream()
+                .filter(chat -> chat.getNotUpToDate().contains(user)).collect(Collectors.toList());
+        sortedChat.addAll(getAllChats.stream()
+                .filter(chat -> !chat.getNotUpToDate().contains(user)).collect(Collectors.toList()));
+
         List<ChatPreviewDTO> chatsPreviews = new ArrayList<>();
-        for (Chat chat : getAllChats) {
-            boolean unread = chat.getNotUpToDate().contains(user);
-            
-            chatsPreviews.add(new ChatPreviewDTO(chat, getChatTitle(chat) ,unread));
+        for (Chat chat : sortedChat) {
+            chatsPreviews.add(chatToDto(chat));
         }
         return chatsPreviews;
     }
-// Expression #6 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'motivedb.chat_members.chat_id' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by
+
+    public ChatPreviewDTO getChatWithFriend(String friendUsername) {
+        Friendship friendship = friendshipService.getFriendshipWithUser(userService.findByUsername(friendUsername));
+        return chatToDto(friendship.getChat());
+    }
+
+    public ChatPreviewDTO getChatForMotive(String motiveId) {
+        Motive motive = motiveService.getMotive(UUID.fromString(motiveId));
+        // check user is in the list of participants
+        Chat chat = motive.getChat();
+        validateIsMember(chat, authService.getAuthUser());
+        return chatToDto(chat);
+    }
+
+    private ChatPreviewDTO chatToDto(Chat chat) {
+        User user = authService.getAuthUser();
+        boolean unread = chat.getNotUpToDate().contains(user);
+        return new ChatPreviewDTO(chat, getChatTitle(chat), unread);
+    }
 
     private String getChatTitle(Chat chat) {
-        if(chat.getType().equals(Chat.TYPE.FRIENDSHIP))
-        {
+        if (chat.getType().equals(Chat.TYPE.FRIENDSHIP)) {
             Friendship friendship = chat.getBelongsToFriendship();
-            return service.extractFriend(friendship).getUsername();
+            return friendshipService.extractFriend(friendship).getUsername();
         }
 
         return chat.getBelongsToMotive().getTitle();
     }
 
-    public void sendMessage(UUID chatId, String message) {
-        Optional<Chat> opChat = repo.findById(chatId);
-        if (!opChat.isPresent())
-            throw new BadUserInput("This chat could be found");
+    public void sendMessage(UUID chatId, String messageContent) {
+        
+        if(messageContent.isEmpty())
+        {
+            throw new BadUserInput("Cannot send empty message");
+        }
 
-        Chat chat = opChat.get();
+        Chat chat = findById(chatId);
 
         User user = authService.getAuthUser();
         validateIsMember(chat, user);
 
-        chat.getMessages().add(new Message(chat, message, user));
+        Message message = new Message(chat, messageContent, user);
+        messageRepo.save(message);
 
-        chat.getNotUpToDate().addAll(chat.getMembers());
-        // remove the message sender from the not upto date list
-        chat.getNotUpToDate().remove(user);
-        
+        // add users to the not upto date list
+        for (User member : chat.getMembers()) {
+            if (!member.equals(user) && !chat.getNotUpToDate().contains(member)) {
+                chat.getNotUpToDate().add(member);
+            }
+        }
+
+        chat.setHeadMessage(message);
         repo.save(chat);
 
-        //TODO notify everyone in the chat about the new message
+        // TODO notify everyone in the chat about the new message
     }
 
     private void validateIsMember(Chat chat, User user) {
@@ -81,14 +122,75 @@ public class ChatService {
             throw new UnauthorizedRequest("user is not a member of the chat");
     }
 
-    // Friendship friendship =
-    // service.getFriendshipWithUser(userRepo.findByUsername("chris").get());
-    // Chat chat =
-    // repo.findById(UUID.fromString("d416ab74-9c48-439e-9741-c051a90d0d28")).get();
-    // chat.getMessages().add(new Message(chat,"wassaaaap"));
-    // repo.save(chat);
-    // friendship.setChat(chat);
-    // friendshipRepo.save(friendship);
-    // repo.save(new
-    // Chat(Arrays.asList(friendship.getReceiver(),friendship.getSender()),friendship));
+    public Chat findById(UUID chatId) {
+        Optional<Chat> chat = repo.findById(chatId);
+        if (!chat.isPresent())
+            throw new EntityNotFound("Could not find chat");
+
+        return chat.get();
+    }
+
+    private void markAsRead(Chat chat) {
+        User user = authService.getAuthUser();
+        if (chat.getNotUpToDate().contains(user)) {
+            chat.getNotUpToDate().remove(user);
+            repo.save(chat);
+        }
+    }
+
+    public List<MessageDTO> getMessages(String chatId, int page) {
+        Chat chat = findById(UUID.fromString(chatId));
+        validateIsMember(chat, authService.getAuthUser());
+        markAsRead(chat);
+
+        List<Message> messages = messageRepo.findByChatId(UUID.fromString(chatId), PageRequest.of(page, 50));
+        List<MessageDTO> messageDtos = new ArrayList<>();
+        for (Message message : messages) {
+            messageDtos.add(new MessageDTO(message));
+        }
+        return messageDtos;
+    }
+
+    /*
+     * This method will take in a list of chatPreviews from the client
+     * It will then check if any of the chats have a new head message,
+     * if so it will create a DTO and return it
+     * essentially having a set of previews for chats the user is not upto date with
+     */
+    public boolean getUpdate(List<ChatPreviewDTO> headMessages) {
+        List<ChatPreviewDTO> updates = new ArrayList<>();
+        for (ChatPreviewDTO preview : headMessages) {
+
+            Chat chat;
+            Message headMessage = null;
+            try {
+                chat = findById(UUID.fromString(preview.getChatId()));
+                // if the head message is null, skip as it means this chat has no messages
+                if (!preview.getHeadMessage().isEmpty()) {
+                    headMessage = findMessageById(UUID.fromString(preview.getHeadMessageId()));
+                }
+            } catch (IllegalArgumentException e) {
+                throw new BadUserInput("Bad format for update. Invalid chatId/MessageId");
+            }
+
+            // validate this user is apart of this chat
+            validateIsMember(chat, authService.getAuthUser());
+
+            if ((preview.getHeadMessage().isEmpty() && chat.getHeadMessage() != null)) {
+                return true;
+            } else if (chat.getHeadMessage() != null && !chat.getHeadMessage().equals(headMessage)) {
+                return true;
+            }
+        }
+
+        return repo.getChats(authService.getAuthUser().getId().toString()).size() != headMessages.size();
+    }
+
+    private Message findMessageById(UUID id) {
+        Optional<Message> chat = messageRepo.findById(id);
+        if (!chat.isPresent())
+            throw new EntityNotFound("Could not find message");
+
+        return chat.get();
+    }
 }

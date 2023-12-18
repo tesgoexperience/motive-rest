@@ -128,11 +128,11 @@ public class AttendanceService {
 
         if (accept) {
             attendance.setStatus(ATTENDANCE_STATUS.CONFIRMED);
+            repo.save(attendance);
             // add new member to chat 
             Chat chat = attendance.getMotive().getChat();
             chat.getMembers().add(attendance.getUser());
             chatRepo.save(chat);
-            repo.save(attendance);
         } else {
             repo.delete(attendance);
         }

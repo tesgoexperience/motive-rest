@@ -40,8 +40,7 @@ public class Friendship {
 
     private boolean approved;
 
-
-    @OneToOne
+    @OneToOne(mappedBy = "belongsToFriendship")
     private Chat chat;
 
     public Friendship(User sender, User receiver) {

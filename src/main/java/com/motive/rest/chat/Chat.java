@@ -1,14 +1,15 @@
 package com.motive.rest.chat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
@@ -23,6 +24,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.motive.rest.chat.message.Message;
 import com.motive.rest.motive.Motive;
 import com.motive.rest.user.User;
 import com.motive.rest.user.friendship.Friendship;
@@ -44,21 +46,20 @@ public class Chat {
     public enum TYPE {
         MOTIVE, FRIENDSHIP
     }
-
-    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
-    private List<Message> messages;
     @ManyToMany
     private List<User> members;
-    @OneToMany
+    @ManyToMany
     private List<User> notUpToDate;
     private TYPE type;
     @OneToOne(cascade = CascadeType.ALL)
     private Friendship belongsToFriendship;
     @OneToOne(cascade = CascadeType.ALL)
     private Motive belongsToMotive;
-
+    
+    @OneToOne
+    private Message headMessage;
+    
     public Chat(List<User> members, Friendship friendship) {
-        this.messages = new ArrayList<>();
         this.notUpToDate = new ArrayList<>();
 
         this.type = TYPE.FRIENDSHIP;
@@ -67,11 +68,11 @@ public class Chat {
         this.belongsToFriendship = friendship;
     }
 
-    public Chat(List<User> members, Motive motive) {
-        this.messages = new ArrayList<>();
+    public Chat(User owner, Motive motive) {
         this.notUpToDate = new ArrayList<>();
 
         this.type = TYPE.MOTIVE;
+        this.members = Arrays.asList(owner);
         this.belongsToMotive = motive;
         this.belongsToFriendship = null;
     }
