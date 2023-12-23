@@ -95,8 +95,6 @@ public class StatusService {
         repo.save(status);
         
         return true;
-
-        
     }
 
     public Status getById(Long statusID) {

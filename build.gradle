@@ -51,6 +51,7 @@ dependencies {
     testImplementation 'org.hsqldb:hsqldb:2.5.2'
     testImplementation 'org.mockito:mockito-core:2.1.0'
     testImplementation 'org.mockito:mockito-core:5.7.0'
+    testImplementation 'org.spockframework:spock-core:2.0-groovy-2.5'
 	testAnnotationProcessor 'org.projectlombok:lombok:1.18.26'
 	testCompileOnly 'org.projectlombok:lombok:1.18.26'
 }

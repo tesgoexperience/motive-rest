@@ -5,12 +5,9 @@ import com.motive.rest.dto.DTOFactory;
 import com.motive.rest.motive.Motive;
 import com.motive.rest.motive.MotiveService;
 import com.motive.rest.motive.attendance.dto.AttendanceDTO;
-import com.motive.rest.motive.attendance.dto.AttendanceResponseDto;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 import com.motive.rest.user.friendship.FriendshipService;
-import org.junit.Ignore;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -154,6 +151,7 @@ class AttendanceServiceTest {
         assertTrue(result.isPresent()); // Verify that the result is an Optional containing the attendance.
         assertEquals(attendance, result.get());
     }
+
     @Test
     public void testFindByMotiveAndUser_Success() {
         // Arrange
@@ -205,8 +203,6 @@ class AttendanceServiceTest {
         verify(repo).findByMotiveAndUser(motive, user);
         assertEquals(Optional.empty(), result);
     }
-
-
 
 
     @Test
@@ -327,8 +323,6 @@ class AttendanceServiceTest {
 //        assertEquals(ATTENDANCE_STATUS.CANCELED, attendance.getStatus());
 //        verify(repo).delete(attendance);
 //    }
-
-
 
 
 }
