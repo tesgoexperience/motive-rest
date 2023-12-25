@@ -207,7 +207,7 @@ public class MotiveService {
                     .contains(authService.getAuthUser());
         }
 
-        if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.FRIENDS)) {
+        if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.FRIENDS) || motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.EVERYONE)) {
             return friendshipService.isFriends(motive.getOwner());
         }
 

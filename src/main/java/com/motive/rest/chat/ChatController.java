@@ -1,6 +1,7 @@
 package com.motive.rest.chat;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,10 +61,16 @@ public class ChatController {
         }
     }
 
-    @PostMapping(value = "/update")
+    @PostMapping(value = "/preview/update")
     @ResponseBody
     public boolean getChatPreviewUpdate(@RequestBody List<ChatPreviewDTO> headMessages) {
-        return service.getUpdate(headMessages);
+        return service.getChatPreviewUpdate(headMessages);
+    }
+
+    @PostMapping(value = "/message/update")
+    @ResponseBody
+    public boolean getChatMessagesUpdate(@RequestBody Map<String,String> headMessage) {
+        return service.checkMessagesUpdate(headMessage.get("headMessage"),headMessage.get("chat"));
     }
     
     @GetMapping(value = "/messages")

@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CardGame",
+            "request": "launch",
+            "mainClass": "CardGame",
+            "projectName": "motive-rest"
+        },
+        {
+            "type": "java",
             "name": "Launch RestApplication",
             "request": "launch",
             "mainClass": "com.motive.rest.RestApplication",
@@ -14,8 +21,8 @@
                 "DB_PASSWORD": "motivepassword",
                 "DB_DATABASE_HOST": "localhost",
                 "DB_DATABASE": "motivedb",
-                "SPRING_PROFILES_ACTIVE":"dev",
-                "REACT_CLIENT_URL": "192.168.1.149:19000",
+                "SPRING_PROFILES_ACTIVE": "dev",
+                "REACT_CLIENT_URL": "192.168.1.149:19000"
             }
         }
     ]

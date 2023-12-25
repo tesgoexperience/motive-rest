@@ -1,6 +1,7 @@
 package com.motive.rest.chat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,6 +9,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,8 @@ import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 import com.motive.rest.user.friendship.Friendship;
 import com.motive.rest.user.friendship.FriendshipService;
+import org.springframework.data.domain.Sort.Direction;
+
 import java.util.stream.Collectors;
 
 @Component
@@ -140,13 +144,15 @@ public class ChatService {
 
     public List<MessageDTO> getMessages(String chatId, int page) {
         Chat chat = findById(UUID.fromString(chatId));
-        validateIsMember(chat, authService.getAuthUser());
+        User user = authService.getAuthUser();
+        validateIsMember(chat, user);
         markAsRead(chat);
 
-        List<Message> messages = messageRepo.findByChatId(UUID.fromString(chatId), PageRequest.of(page, 50));
+        List<Message> messages = messageRepo.findByChatIdOrderByCreateDateDesc(UUID.fromString(chatId), PageRequest.of(page, 50,Sort.by("createDate")));
+        Collections.reverse(messages);
         List<MessageDTO> messageDtos = new ArrayList<>();
         for (Message message : messages) {
-            messageDtos.add(new MessageDTO(message));
+            messageDtos.add(new MessageDTO(message,message.getSender().equals(user)));
         }
         return messageDtos;
     }
@@ -154,12 +160,11 @@ public class ChatService {
     /*
      * This method will take in a list of chatPreviews from the client
      * It will then check if any of the chats have a new head message,
-     * if so it will create a DTO and return it
+     * if so it will return true notifying the client they need to refresh they're chats
      * essentially having a set of previews for chats the user is not upto date with
      */
-    public boolean getUpdate(List<ChatPreviewDTO> headMessages) {
-        List<ChatPreviewDTO> updates = new ArrayList<>();
-        for (ChatPreviewDTO preview : headMessages) {
+    public boolean getChatPreviewUpdate(List<ChatPreviewDTO> chats) {
+        for (ChatPreviewDTO preview : chats) {
 
             Chat chat;
             Message headMessage = null;
@@ -183,9 +188,24 @@ public class ChatService {
             }
         }
 
-        return repo.getChats(authService.getAuthUser().getId().toString()).size() != headMessages.size();
+        return repo.getChats(authService.getAuthUser().getId().toString()).size() != chats.size();
     }
 
+    public boolean checkMessagesUpdate(String headMessageId, String chatId ){
+        Chat chat = findById(UUID.fromString(chatId));
+        // if the client head message is empty but the chat has a had message it means the client is behind
+        if(headMessageId == "" && chat.getHeadMessage() != null){
+            return true;
+        }
+        
+        if (headMessageId == ""){
+            return false;
+        }
+
+        Message message = findMessageById(UUID.fromString(headMessageId));
+        
+        return !message.getChat().getHeadMessage().equals(message);
+    }
     private Message findMessageById(UUID id) {
         Optional<Message> chat = messageRepo.findById(id);
         if (!chat.isPresent())

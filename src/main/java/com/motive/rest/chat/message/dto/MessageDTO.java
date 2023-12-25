@@ -8,13 +8,17 @@ import lombok.Getter;
 
 @Getter
 public class MessageDTO {
+    private String id;
     private String sender;
     private Date sentOn;
-    private String message;
+    private String content;
+    private boolean sentByMe;
 
-    public MessageDTO(Message m) {
+    public MessageDTO(Message m, boolean sentByMe) {
+        id = m.getId().toString();
         sender = m.getSender().getUsername();
         sentOn = m.getCreateDate();
-        message = m.getContent();
+        content = m.getContent();
+        this.sentByMe = sentByMe;
     }
 }

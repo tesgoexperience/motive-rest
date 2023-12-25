@@ -123,8 +123,8 @@ public class ChatTest {
         JSONArray messagesPage2 = chatUtil.getMessages(chatPreview.getAsString("chatId"), friend.getAsString("token"),
                 1);
 
-        assertEquals(firstMessage.get("message"), ((JSONObject) messagesPage1.get(0)).get("message"));
-        assertEquals(fiftyFirstMessage.get("message"), ((JSONObject) messagesPage2.get(0)).get("message"));
+        assertEquals(firstMessage.get("message"), ((JSONObject) messagesPage1.get(0)).get("content"));
+        assertEquals(fiftyFirstMessage.get("message"), ((JSONObject) messagesPage2.get(0)).get("content"));
     }
 
     @Test
