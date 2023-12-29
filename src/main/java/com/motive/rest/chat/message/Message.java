@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
@@ -35,10 +36,10 @@ import javax.persistence.Entity;
 @EqualsAndHashCode
 public class Message {
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Type(type = "uuid-char")
-    private UUID id;
+    @GeneratedValue(
+        strategy = GenerationType.SEQUENCE
+    )
+    private Long id;
     @ManyToOne
     Chat chat;
     @Lob

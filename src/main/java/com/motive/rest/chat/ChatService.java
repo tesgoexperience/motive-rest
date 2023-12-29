@@ -148,7 +148,7 @@ public class ChatService {
         validateIsMember(chat, user);
         markAsRead(chat);
 
-        List<Message> messages = messageRepo.findByChatIdOrderByCreateDateDesc(UUID.fromString(chatId), PageRequest.of(page, 50,Sort.by("createDate")));
+        List<Message> messages = messageRepo.findByChatIdOrderByCreateDateDesc(UUID.fromString(chatId), PageRequest.of(page, 50,Sort.by("id")));
         Collections.reverse(messages);
         List<MessageDTO> messageDtos = new ArrayList<>();
         for (Message message : messages) {
@@ -172,7 +172,7 @@ public class ChatService {
                 chat = findById(UUID.fromString(preview.getChatId()));
                 // if the head message is null, skip as it means this chat has no messages
                 if (!preview.getHeadMessage().isEmpty()) {
-                    headMessage = findMessageById(UUID.fromString(preview.getHeadMessageId()));
+                    headMessage = findMessageById(Long.valueOf(preview.getHeadMessageId()));
                 }
             } catch (IllegalArgumentException e) {
                 throw new BadUserInput("Bad format for update. Invalid chatId/MessageId");
@@ -202,15 +202,17 @@ public class ChatService {
             return false;
         }
 
-        Message message = findMessageById(UUID.fromString(headMessageId));
-        
+
+        Message message = findMessageById(Long.valueOf(headMessageId));
+
         return !message.getChat().getHeadMessage().equals(message);
     }
-    private Message findMessageById(UUID id) {
-        Optional<Message> chat = messageRepo.findById(id);
-        if (!chat.isPresent())
+    
+    private Message findMessageById(Long id) {
+        Optional<Message> message = messageRepo.findById(id);
+        if (!message.isPresent())
             throw new EntityNotFound("Could not find message");
 
-        return chat.get();
+        return message.get();
     }
 }
