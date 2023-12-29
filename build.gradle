@@ -45,6 +45,7 @@ dependencies {
 
     runtimeOnly 'org.springframework.boot:spring-boot-devtools:2.7.2'
     runtimeOnly 'mysql:mysql-connector-java:8.0.29'
+    implementation 'com.google.code.gson:gson:2.7'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.2'
     testImplementation 'org.springframework.security:spring-security-test:5.7.2'
     testImplementation 'org.junit.vintage:junit-vintage-engine:5.8.2'

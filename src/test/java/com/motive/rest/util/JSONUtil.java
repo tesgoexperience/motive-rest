@@ -3,6 +3,7 @@ package com.motive.rest.util;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import net.minidev.json.JSONArray;
@@ -66,4 +67,21 @@ public class JSONUtil {
     public JSONArray toJsonArray(String jsonString) throws ParseException {
         return (JSONArray) parser.parse(jsonString);
     }
+
+
+    public JSONObject attendanceResponseObject( String username, String uuid) {
+        JSONObject attendanceResponse = new JSONObject();
+        attendanceResponse.put("attendeeUsername",username);
+        attendanceResponse.put("motiveId",uuid);
+
+        return attendanceResponse;
+    }
+
+
+
+
+
+
+
+
 }

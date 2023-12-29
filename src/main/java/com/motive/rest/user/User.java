@@ -3,9 +3,8 @@ package com.motive.rest.user;
 import javax.persistence.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.motive.rest.Auth.AuthDetails;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.Data;
+import lombok.*;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
@@ -22,7 +21,11 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 
-@Entity @Data @JsonIgnoreProperties @NoArgsConstructor
+// Removed @NoArgsConstructor annotation
+
+@Entity @JsonIgnoreProperties @NoArgsConstructor
+@Getter
+@Setter
 public class User {
 
     @Id

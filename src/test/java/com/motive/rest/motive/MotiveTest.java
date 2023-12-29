@@ -164,6 +164,4 @@ public class MotiveTest {
 
 	 	assertEquals(1L, mvcUtil.getRequest("/motive/stats", token).getBodyAsJson().getAsNumber("attending"));
 	}
-
-
 }
