@@ -19,7 +19,7 @@ public class ChatUtil {
     public JSONObject anyMessage(String chat, String senderToken) throws Exception {
         JSONObject message = new JSONObject();
         message.appendField("chatId", chat);
-        message.appendField("message", faker.simpsons().quote());
+        message.appendField("message", faker.rickAndMorty().quote());
         mvcUtil.postRequest("/chat/send", message.toJSONString(), senderToken);
         return message;
     }

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.hsqldb.lib.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.motive.rest.util.ChatUtil;
 import com.motive.rest.util.MotiveUtil;
 import com.motive.rest.util.MvcUtil;
-import com.motive.rest.util.SimpleResponse;
 import com.motive.rest.util.SocialUtil;
 
 import net.minidev.json.JSONArray;
@@ -48,7 +48,7 @@ public class ChatTest {
     @Test
     public void chat_created_for_friendship() throws Exception {
         String token = socialUtil.getToken(social);
-        JSONObject friend = socialUtil.getFriend(social);
+        JSONObject friend = socialUtil.createFriend((JSONObject)social.get("user"));
         assertTrue(mvcUtil.getRequest("/chat/preview", token).getBody().contains(friend.getAsString("username")));
     }
 
@@ -63,7 +63,7 @@ public class ChatTest {
     @Test
     public void attendee_added_to_motive_chat() throws Exception {
         String token = socialUtil.getToken(social);
-        JSONObject friend = socialUtil.getFriend(social);
+        JSONObject friend = socialUtil.createFriend((JSONObject)social.get("user"));
         JSONObject motive = motiveUtil.anyMotiveWithAttendee(token, friend);
         assertTrue(mvcUtil.getRequest("/chat/preview", token).getBody().contains(motive.getAsString("title")));
     }
@@ -72,28 +72,29 @@ public class ChatTest {
     public void exchange_message_with_friend() throws Exception {
         JSONObject user = ((JSONObject) social.get("user"));
         String token = user.getAsString("token");
-        JSONObject friend = socialUtil.getFriend(social);
+        JSONObject friend = socialUtil.createFriend((JSONObject)social.get("user"));
 
         JSONObject message = chatUtil.sendMessageToFriend(friend.getAsString("username"), token);
 
         // assert friend has received the message
-        JSONObject chatPreview = chatUtil.getFriendChatPreview(user.getAsString("username"), friend.getAsString("token"));
+        JSONObject chatPreview = chatUtil.getFriendChatPreview(user.getAsString("username"),
+                friend.getAsString("token"));
 
         assertTrue(chatPreview.getAsString("headMessage").contains(message.getAsString("message")));
         assertTrue(chatPreview.getAsString("unread").equals("true"));
     }
 
-
     @Test
     public void exchange_message_with_motive() throws Exception {
         String token = socialUtil.getToken(social);
-        JSONObject friend = socialUtil.getFriend(social);
+        JSONObject friend = socialUtil.createFriend((JSONObject)social.get("user"));
         JSONObject motive = motiveUtil.anyMotiveWithAttendee(token, friend);
 
         // send message
         JSONObject message = chatUtil.sendMessageToMotive(motive.getAsString("id"), token);
 
-        JSONObject chatWithMessage = chatUtil.getMotiveChatPreview(motive.getAsString("id"), friend.getAsString("token"));
+        JSONObject chatWithMessage = chatUtil.getMotiveChatPreview(motive.getAsString("id"),
+                friend.getAsString("token"));
 
         assertTrue(chatWithMessage.getAsString("headMessage").contains(message.getAsString("message")));
         assertTrue(chatWithMessage.getAsString("unread").equals("true"));
@@ -103,7 +104,7 @@ public class ChatTest {
     @Test
     public void get_messages() throws Exception {
         String token = socialUtil.getToken(social);
-        JSONObject friend = socialUtil.getFriend(social);
+        JSONObject friend = socialUtil.createFriend((JSONObject)social.get("user"));
         JSONObject motive = motiveUtil.anyMotiveWithAttendee(token, friend);
 
         JSONObject chatPreview = chatUtil.getMotiveChatPreview(motive.getAsString("id"), friend.getAsString("token"));
@@ -130,22 +131,26 @@ public class ChatTest {
     @Test
     public void chatPreviewUpdate() throws Exception {
         String token = socialUtil.getToken(social);
-        JSONObject friend = socialUtil.getFriend(social);
+        JSONObject friend = socialUtil.createFriend((JSONObject)social.get("user"));
         JSONObject user = ((JSONObject) social.get("user"));
 
-        JSONArray previews = mvcUtil.getRequest("/chat/preview", token).getBodyAsJsonArray();
+        JSONObject preview = chatUtil.getFriendChatPreview(user.getAsString("username"), friend.getAsString("token"));
 
         // check update returns empty as there are no new messages
-        assertEquals(mvcUtil.postRequest("/chat/update", previews.toJSONString(), token)
+        JSONObject messageUpdateDto = new JSONObject();
+        messageUpdateDto.put("chat", preview.getAsString("chatId"));
+        messageUpdateDto.put("headMessage", preview.getAsString("headMessageId"));
+        assertEquals(mvcUtil.postRequest("/chat/message/update", messageUpdateDto.toString(), token)
                 .getBody(), "false");
 
         // send message as friend then check if there is an update
         chatUtil.sendMessageToFriend(user.getAsString("username"), friend.getAsString("token"));
 
-         // since a friend has now sent us a message, out chat preview update should contain an update
-               assertEquals(mvcUtil.postRequest("/chat/update", previews.toJSONString(), token)
+        // since a friend has now sent us a message, out chat preview update should
+        // contain an update
+        assertEquals(mvcUtil.postRequest("/chat/message/update", messageUpdateDto.toString(), token)
                 .getBody(), "true");
-    
+
     }
 
     @Test

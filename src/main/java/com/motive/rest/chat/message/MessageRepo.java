@@ -6,5 +6,5 @@ import java.util.UUID;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 public interface MessageRepo extends PagingAndSortingRepository<Message,Long>{
-    List<Message> findByChatIdOrderByCreateDateDesc(UUID chatId,Pageable pageable); 
+    List<Message> findByChatIdOrderByCreateDateAsc(UUID chatId,Pageable pageable); 
 }

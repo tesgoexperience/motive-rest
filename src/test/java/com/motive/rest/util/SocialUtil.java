@@ -80,8 +80,4 @@ public class SocialUtil {
     public String getToken(JSONObject social) {
         return ((JSONObject) social.get("user")).getAsString("token");
     }
-    public JSONObject getFriend(JSONObject social) {
-        JSONArray friends = (JSONArray) social.get("friends");
-        return (JSONObject)friends.get(new Random().nextInt(friends.size()));
-    }
 }

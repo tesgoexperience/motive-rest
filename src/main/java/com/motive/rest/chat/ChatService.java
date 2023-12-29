@@ -148,8 +148,8 @@ public class ChatService {
         validateIsMember(chat, user);
         markAsRead(chat);
 
-        List<Message> messages = messageRepo.findByChatIdOrderByCreateDateDesc(UUID.fromString(chatId), PageRequest.of(page, 50,Sort.by("id")));
-        Collections.reverse(messages);
+        List<Message> messages = messageRepo.findByChatIdOrderByCreateDateAsc(UUID.fromString(chatId), PageRequest.of(page, 50,Sort.by("id")));
+        // Collections.reverse(messages);
         List<MessageDTO> messageDtos = new ArrayList<>();
         for (Message message : messages) {
             messageDtos.add(new MessageDTO(message,message.getSender().equals(user)));
