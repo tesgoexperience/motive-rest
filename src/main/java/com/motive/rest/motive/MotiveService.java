@@ -6,6 +6,7 @@ import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.exceptions.UnauthorizedRequest;
 import com.motive.rest.motive.Invite.Invite;
+import com.motive.rest.motive.attendance.Attendance;
 import com.motive.rest.motive.attendance.AttendanceRepo;
 import com.motive.rest.motive.attendance.dto.StatsDTO;
 import com.motive.rest.motive.dto.MotiveDTO;
@@ -114,14 +115,17 @@ public class MotiveService {
             allFriends.addAll(
                     motive.getSpecificallyInvited().stream().map(e -> e.getUser()).collect(Collectors.toList()));
         } else if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.FRIENDS)) {
-            allFriends.addAll(friendshipService.getFriends());
+            for (User friend : friendshipService.getFriends()) {
+                allFriends.add(friend);
+            }
         }
 
-        for (User invited : allFriends) {
-            notificationService.notify(invited, user.getUsername() + " has started a new motive", true);
+        // remove all the friends that already have an attendance status
+        for (Attendance attendance : motive.getAttendance()) {
+            allFriends.remove(attendance.getUser());
         }
 
-        return convertMotiveToDTO(motive);
+        return allFriends;
     }
 
     public Motive getMotive(UUID id) {

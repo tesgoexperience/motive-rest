@@ -5,6 +5,7 @@ import com.motive.rest.Auth.AuthService;
 import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.exceptions.UnauthorizedRequest;
 import com.motive.rest.motive.status.dto.StatusBrowseDTO;
+import com.motive.rest.notification.NotificationService;
 import com.motive.rest.user.User;
 import com.motive.rest.user.friendship.FriendshipService;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,9 @@ class StatusServiceTest {
 
     @Mock
     User user;
+
+    @Mock
+    NotificationService notificationService;
 
     @InjectMocks
     StatusService statusService;
