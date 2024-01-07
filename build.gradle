@@ -39,6 +39,8 @@ dependencies {
     api 'org.modelmapper:modelmapper:2.4.4'
     api 'net.datafaker:datafaker:1.5.0'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.2'
+    api 'io.github.jav:expo-server-sdk:1.1.0'
+
 
     compileOnly 'org.projectlombok:lombok:1.18.26'
 	annotationProcessor 'org.projectlombok:lombok:1.18.26'

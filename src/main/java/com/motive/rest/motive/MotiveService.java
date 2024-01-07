@@ -14,6 +14,8 @@ import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 import com.motive.rest.user.friendship.FriendshipService;
 
+import io.github.jav.exposerversdk.PushClientException;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -88,7 +90,24 @@ public class MotiveService {
 
         repo.save(motive);
 
-        // notify all potential attendees for the new motive
+        // notify all potential attendees
+        List<User> invitedUsers = getPotentialAttendees(motive);
+        for (User invited : invitedUsers) {
+            notificationService.notify("New motive from " + user.getUsername(), motive.getTitle(),
+                    invited.getAuthDetails().getNotificationToken());
+        }
+
+        return convertMotiveToDTO(motive);
+    }
+
+    /**
+     * Get the list of friends who are not in the hidden from list, have no
+     * rejected, pending or confirmed attendances
+     * 
+     * @param motive
+     * @return the remaining friends after subtraction
+     */
+    public List<User> getPotentialAttendees(Motive motive) {
         List<User> allFriends = new ArrayList<>();
 
         if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.SPECIFIC_FRIENDS)) {
