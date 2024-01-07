@@ -45,6 +45,13 @@ public class AuthService  {
         userService.save(user);
     }
 
+	public boolean saveToken(String token) {
+		AuthDetails authDetails = getAuthUser().getAuthDetails();
+        authDetails.setNotificationToken(token);
+        repo.save(authDetails);
+        return true;
+	}
+
     public User getAuthUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return repo.findByEmail(authentication.getName()).orElseThrow().getOwner();

@@ -8,6 +8,7 @@ import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.exceptions.UnauthorizedRequest;
 import com.motive.rest.motive.Invite.Invite;
+import com.motive.rest.motive.attendance.Attendance;
 import com.motive.rest.motive.attendance.AttendanceRepo;
 import com.motive.rest.motive.attendance.dto.StatsDTO;
 import com.motive.rest.motive.dto.MotiveDTO;
@@ -15,6 +16,8 @@ import com.motive.rest.notification.NotificationService;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 import com.motive.rest.user.friendship.FriendshipService;
+
+import io.github.jav.exposerversdk.PushClientException;
 
 import org.springframework.stereotype.Service;
 
@@ -95,21 +98,41 @@ public class MotiveService {
         repo.save(motive);
         chatRepo.save(new Chat(user,motive));
 
-        // notify all potential attendees for the new motive
+        // notify all potential attendees
+        List<User> invitedUsers = getPotentialAttendees(motive);
+        for (User invited : invitedUsers) {
+            notificationService.notify("New motive from " + user.getUsername(), motive.getTitle(),
+                    invited.getAuthDetails().getNotificationToken());
+        }
+
+        return convertMotiveToDTO(motive);
+    }
+
+    /**
+     * Get the list of friends who are not in the hidden from list, have no
+     * rejected, pending or confirmed attendances
+     * 
+     * @param motive
+     * @return the remaining friends after subtraction
+     */
+    public List<User> getPotentialAttendees(Motive motive) {
         List<User> allFriends = new ArrayList<>();
 
         if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.SPECIFIC_FRIENDS)) {
             allFriends.addAll(
                     motive.getSpecificallyInvited().stream().map(e -> e.getUser()).collect(Collectors.toList()));
         } else if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.FRIENDS)) {
-            allFriends.addAll(friendshipService.getFriends());
+            for (User friend : friendshipService.getFriends()) {
+                allFriends.add(friend);
+            }
         }
 
-        for (User invited : allFriends) {
-            notificationService.notify(invited, user.getUsername() + " has started a new motive", true);
+        // remove all the friends that already have an attendance status
+        for (Attendance attendance : motive.getAttendance()) {
+            allFriends.remove(attendance.getUser());
         }
 
-        return convertMotiveToDTO(motive);
+        return allFriends;
     }
 
     public Motive getMotive(UUID id) {

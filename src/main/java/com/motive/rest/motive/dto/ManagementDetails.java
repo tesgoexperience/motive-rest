@@ -8,7 +8,6 @@ import com.motive.rest.motive.Invite.Invite;
 import com.motive.rest.motive.attendance.Attendance;
 import com.motive.rest.motive.attendance.Attendance.ATTENDANCE_STATUS;
 
-
 public class ManagementDetails implements DTO {
 
     private List<Attendance> attendance;

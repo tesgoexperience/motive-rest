@@ -14,6 +14,7 @@ import com.motive.rest.exceptions.EntityNotFound;
 import com.motive.rest.exceptions.IllogicalRequest;
 import com.motive.rest.exceptions.UnauthorizedRequest;
 import com.motive.rest.motive.status.dto.StatusBrowseDTO;
+import com.motive.rest.notification.NotificationService;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 import com.motive.rest.user.friendship.FriendshipService;
@@ -32,7 +33,10 @@ public class StatusService {
 
     @Autowired
     AuthService authService;
-    
+
+    @Autowired
+    private NotificationService notificationService;
+
     public List<StatusBrowseDTO> getAll() {
         User currentUser = authService.getAuthUser();
         // friends who can see the status
@@ -93,10 +97,9 @@ public class StatusService {
 
         status.getInterest().add(new Interest(status, currentUser));
         repo.save(status);
-        
+        notificationService.
+        notify("Status", currentUser.getUsername()+ " is interested", status.getOwner().getAuthDetails().getNotificationToken());
         return true;
-
-        
     }
 
     public Status getById(Long statusID) {
@@ -108,7 +111,25 @@ public class StatusService {
     }
 
     public ResponseEntity<Boolean> createStatus(String status) {
-        repo.save(new Status(status,authService.getAuthUser()));
+        
+        User user = authService.getAuthUser();
+        repo.save(new Status(status,user));
+        
+        List<User> friends = friendshipService.getFriends();
+        for (User friend : friends) {
+            if (user.getHideStatusFrom().contains(friend)) {
+                friends.remove(friend);
+            }
+        }
+
+        String statusSubstring = status;
+        if (status.length() > 50) {
+            statusSubstring = status.substring(0, 49)+"...";
+        }
+        for (User friend : friends) {
+            notificationService.notify("New status from " +user.getUsername(), statusSubstring, friend.getAuthDetails().getNotificationToken());
+        }
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

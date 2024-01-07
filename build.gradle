@@ -38,16 +38,22 @@ dependencies {
     api 'org.modelmapper:modelmapper:2.4.4'
     api 'net.datafaker:datafaker:1.5.0'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.2'
+    api 'io.github.jav:expo-server-sdk:1.1.0'
+
 
     compileOnly 'org.projectlombok:lombok:1.18.26'
 	annotationProcessor 'org.projectlombok:lombok:1.18.26'
 
     runtimeOnly 'org.springframework.boot:spring-boot-devtools:2.7.2'
     runtimeOnly 'mysql:mysql-connector-java:8.0.29'
+    implementation 'com.google.code.gson:gson:2.7'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.2'
     testImplementation 'org.springframework.security:spring-security-test:5.7.2'
     testImplementation 'org.junit.vintage:junit-vintage-engine:5.8.2'
     testImplementation 'org.hsqldb:hsqldb:2.5.2'
+    testImplementation 'org.mockito:mockito-core:2.1.0'
+    testImplementation 'org.mockito:mockito-core:5.7.0'
+    testImplementation 'org.spockframework:spock-core:2.0-groovy-2.5'
 	testAnnotationProcessor 'org.projectlombok:lombok:1.18.26'
 	testCompileOnly 'org.projectlombok:lombok:1.18.26'
 }
