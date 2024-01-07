@@ -6,11 +6,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import com.motive.rest.Util.ServiceInterface;
 import com.motive.rest.exceptions.EntityNotFound;
 
 @Service
-public class UserService implements ServiceInterface<User>{
+public class UserService {
 
     public enum REQUEST_RESPONSE {
         ACCEPT, REJECT, CANCEL, REMOVE_FRIEND
@@ -44,18 +43,15 @@ public class UserService implements ServiceInterface<User>{
         return user;
     }
 
-    @Override
     public User save(User object) {
         return repo.save(object);
     }
 
-    @Override
     public void delete(User object) {
        repo.delete(object);
         
     }
 
-    @Override
     public User findById(UUID id) {
         return repo.findById(id).orElseThrow();
     }

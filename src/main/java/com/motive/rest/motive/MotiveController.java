@@ -1,6 +1,7 @@
 package com.motive.rest.motive;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -52,26 +53,23 @@ public class MotiveController {
         return service.manageMotives();
     }
 
+    @GetMapping(value = "/past")
+    @ResponseBody
+    public List<MotiveDTO> getPastMotives() {
+        return service.getPastMotives();
+    }
+
     @PostMapping(value = "/create")
     @ResponseBody //todo use manageDto rather than createMotiveDto here to make reduce repition for updates
     public ResponseEntity<MotiveDTO> createMotive(@RequestBody CreateMotiveDTO motive) {
-        MotiveDTO dto = service.createMotive(motive.getTitle(), motive.getDescription(), motive.getStart(), motive.getAttendanceType(),
+        MotiveDTO dto = service.createMotive(motive.getTitle(), motive.getDescription(), motive.getStart(), motive.getEnd(), motive.getAttendanceType(),
                 motive.getSpecificallyInvited());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-
     @GetMapping(value = "/get")
     @ResponseBody //todo use manageDto rather than createMotiveDto here to make reduce repition for updates
-    public ResponseEntity<DTO> getMotive(@RequestParam Long motive) {
+    public ResponseEntity<DTO> getMotive(@RequestParam UUID motive) {
         return new ResponseEntity<>(service.getMotiveDto(motive), HttpStatus.OK);
     }
-
-    // @PostMapping(value = "/update")
-    // @ResponseBody
-    // public ResponseEntity<MotiveManageDTO> createMotive(@RequestBody MotiveManageDTO motive) {
-    //     MotiveManageDTO dto = service.createMotive(motive.getTitle(), motive.getDescription(), motive.getStart(), motive.getAttendanceType(),
-    //             motive.getSpecificallyInvited());
-    //     return new ResponseEntity<>(dto, HttpStatus.OK);
-    // }
 }

@@ -1,6 +1,5 @@
 package com.motive.rest.Auth;
 
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -8,14 +7,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.motive.rest.Util.ServiceInterface;
 import com.motive.rest.dto.RegisterUser;
 import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 
 @Service
-public class AuthService implements ServiceInterface<AuthDetails> {
+public class AuthService  {
 
     @Autowired
     UserService userService;
@@ -47,27 +45,13 @@ public class AuthService implements ServiceInterface<AuthDetails> {
         userService.save(user);
     }
 
-    @Override
-    public AuthDetails save(AuthDetails object) {
-        return repo.save(object);
-    }
-
-    @Override
-    public void delete(AuthDetails object) {
-        repo.delete(object);
-    }
-
-    @Override
-    public AuthDetails findById(UUID id) {
-        return repo.findById(id).orElseThrow();
-    }
-
 	public boolean saveToken(String token) {
 		AuthDetails authDetails = getAuthUser().getAuthDetails();
         authDetails.setNotificationToken(token);
         repo.save(authDetails);
         return true;
 	}
+
     public User getAuthUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return repo.findByEmail(authentication.getName()).orElseThrow().getOwner();

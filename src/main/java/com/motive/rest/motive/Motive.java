@@ -25,8 +25,11 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -43,9 +46,12 @@ public class Motive {
         EVERYONE/* TODO Change to friends of friends or change to friends of friends*/, FRIENDS, SPECIFIC_FRIENDS
     }
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Id
-    private Long id;
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Type(type = "uuid-char")
+    private UUID id;
     private String title;
 
     @ManyToOne
@@ -54,14 +60,14 @@ public class Motive {
     @Column(name = "description", length = 50000)
     private String description;
     private Date start;
-
+    private Date end;
     @OneToMany(mappedBy = "motive")
     private List<Attendance> attendance;
 
     @OneToMany(mappedBy = "motive", cascade = CascadeType.ALL)
     private List<Invite> specificallyInvited;
 
-    private boolean finished;
+    private boolean cancelled;
 
     private ATTENDANCE_TYPE attendanceType;
 
@@ -70,14 +76,15 @@ public class Motive {
     @Column(name = "create_date")
     private Date createDate;
 
-    public Motive(User owner, String title, String description, Date start, ATTENDANCE_TYPE type) {
+    public Motive(User owner, String title, String description, Date start, Date end, ATTENDANCE_TYPE type) {
         this.owner = owner;
         this.title = title;
         this.description = description;
         this.start = start;
+        this.end = end;
         this.attendance = new ArrayList<>();
         this.specificallyInvited = new ArrayList<>();
-        this.finished = false;
+        this.cancelled = false;
         this.attendanceType = type;
     }
 }

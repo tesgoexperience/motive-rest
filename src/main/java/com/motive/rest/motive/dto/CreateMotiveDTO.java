@@ -15,6 +15,7 @@ public class CreateMotiveDTO implements DTO {
     private String title;
     private String description;
     private Date start;
+    private Date end;
     private ATTENDANCE_TYPE attendanceType;
     private String[] specificallyInvited;
 

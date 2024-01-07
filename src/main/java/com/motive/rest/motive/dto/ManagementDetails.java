@@ -7,6 +7,7 @@ import com.motive.rest.dto.DTO;
 import com.motive.rest.motive.Invite.Invite;
 import com.motive.rest.motive.attendance.Attendance;
 import com.motive.rest.motive.attendance.Attendance.ATTENDANCE_STATUS;
+
 public class ManagementDetails implements DTO {
 
     private List<Attendance> attendance;
@@ -14,6 +15,11 @@ public class ManagementDetails implements DTO {
     public ManagementDetails(List<Attendance> attendance, List<Invite> specificallyInvited) {
         this.attendance = attendance;
         this.specificallyInvited = specificallyInvited;
+    }
+
+    public ManagementDetails() {
+        this.attendance = new ArrayList<Attendance>();
+        this.specificallyInvited = new ArrayList<>();
     }
 
     public List<String> getRequests() {
