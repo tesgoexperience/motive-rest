@@ -1,6 +1,8 @@
 package com.motive.rest.motive;
 
 import com.motive.rest.Auth.AuthService;
+import com.motive.rest.chat.Chat;
+import com.motive.rest.chat.ChatRepo;
 import com.motive.rest.dto.DTOFactory;
 import com.motive.rest.exceptions.BadUserInput;
 import com.motive.rest.exceptions.EntityNotFound;
@@ -52,6 +54,8 @@ public class MotiveService {
     @Autowired
     AuthService authService;
 
+    @Autowired
+    ChatRepo chatRepo;
     /**
      * Creates a motive and notifies this users friends
      * 
@@ -81,7 +85,9 @@ public class MotiveService {
                 start,
                 end,
                 type);
-
+        
+        // motive.setChat(new Chat(new ArrayList<>(), motive));
+        
         if (type.equals(Motive.ATTENDANCE_TYPE.SPECIFIC_FRIENDS)) {
             for (String username : specificallyInvited) {
                 friendshipService.validateFriendship(username);
@@ -90,6 +96,7 @@ public class MotiveService {
         }
 
         repo.save(motive);
+        chatRepo.save(new Chat(user,motive));
 
         // notify all potential attendees
         List<User> invitedUsers = getPotentialAttendees(motive);
@@ -223,7 +230,7 @@ public class MotiveService {
                     .contains(authService.getAuthUser());
         }
 
-        if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.FRIENDS)) {
+        if (motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.FRIENDS) || motive.getAttendanceType().equals(Motive.ATTENDANCE_TYPE.EVERYONE)) {
             return friendshipService.isFriends(motive.getOwner());
         }
 

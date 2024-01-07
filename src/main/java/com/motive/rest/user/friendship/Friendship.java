@@ -1,6 +1,8 @@
 package com.motive.rest.user.friendship;
 
 import javax.persistence.Entity;
+
+import com.motive.rest.chat.Chat;
 import com.motive.rest.user.User;
 
 import lombok.EqualsAndHashCode;
@@ -14,6 +16,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 
 @NoArgsConstructor
 @Getter
@@ -36,6 +39,9 @@ public class Friendship {
     private User receiver;
 
     private boolean approved;
+
+    @OneToOne(mappedBy = "belongsToFriendship")
+    private Chat chat;
 
     public Friendship(User sender, User receiver) {
         this.receiver = receiver;

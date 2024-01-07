@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.motive.rest.Auth.AuthService;
+import com.motive.rest.chat.Chat;
+import com.motive.rest.chat.ChatRepo;
 import com.motive.rest.dto.DTOFactory;
 import com.motive.rest.dto.DTOFactory.DTO_TYPE;
 import com.motive.rest.exceptions.EntityNotFound;
@@ -39,6 +41,8 @@ public class AttendanceService {
     AuthService authService;
     @Autowired
     FriendshipService friendshipService;
+    @Autowired
+    ChatRepo chatRepo;
     @Autowired
     private NotificationService notificationService;
 
@@ -131,6 +135,10 @@ public class AttendanceService {
         if (accept) {
             attendance.setStatus(ATTENDANCE_STATUS.CONFIRMED);
             repo.save(attendance);
+            // add new member to chat 
+            Chat chat = attendance.getMotive().getChat();
+            chat.getMembers().add(attendance.getUser());
+            chatRepo.save(chat);
             notificationService.notify(attendance.getMotive().getTitle(), "Request accepted!", attendance.getUser().getAuthDetails().getNotificationToken());
         } else {
             repo.delete(attendance);

@@ -5,6 +5,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.motive.rest.chat.Chat;
 import com.motive.rest.motive.Invite.Invite;
 import com.motive.rest.motive.attendance.Attendance;
 import com.motive.rest.user.User;
@@ -21,6 +22,7 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -75,6 +77,9 @@ public class Motive {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "create_date")
     private Date createDate;
+
+    @OneToOne(mappedBy = "belongsToMotive")
+    private Chat chat;
 
     public Motive(User owner, String title, String description, Date start, Date end, ATTENDANCE_TYPE type) {
         this.owner = owner;

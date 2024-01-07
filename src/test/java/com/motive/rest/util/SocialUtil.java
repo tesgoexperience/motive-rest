@@ -1,6 +1,7 @@
 package com.motive.rest.util;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Random;
 
 import org.springframework.test.web.servlet.MockMvc;
 

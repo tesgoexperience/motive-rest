@@ -54,7 +54,7 @@ public class MotiveTest {
 	@Test
 	public void createManageMotive() throws UnsupportedEncodingException, Exception {
 		String token = socialUtil.getToken(social);
-		JSONObject friend = (JSONObject) ((JSONArray) social.get("friends")).get(0);
+		JSONObject friend = socialUtil.createFriend((JSONObject)social.get("user"));
 
 		// create a motive
 		SimpleResponse res = mvcUtil.postRequest("/motive/create/",
@@ -109,7 +109,7 @@ public class MotiveTest {
 	@Test
 	public void ViewMotiveOpenToOnlyFriends() throws UnsupportedEncodingException, Exception {
 		String token = socialUtil.getToken(social);
-		JSONObject friend = (JSONObject) ((JSONArray) social.get("friends")).get(0);
+		JSONObject friend = socialUtil.createFriend((JSONObject)social.get("user"));
 		JSONObject stranger = (JSONObject) ((JSONArray) social.get("outgoingRequests")).get(0);
 		// create a motive
 		SimpleResponse res = mvcUtil.postRequest("/motive/create/", json.motiveObject("FRIENDS").toJSONString(),
