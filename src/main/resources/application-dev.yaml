@@ -15,6 +15,7 @@ spring:
 
 logging:
   level:
+    web: DEBUG
     org:
       springframework:
         web: DEBUG
