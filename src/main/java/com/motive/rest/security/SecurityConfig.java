@@ -108,7 +108,7 @@ public class SecurityConfig {
      @Bean
      CorsConfigurationSource corsConfigurationSource() {
          CorsConfiguration configuration = new CorsConfiguration();
-         configuration.setAllowedOrigins(List.of(reactClient));
+         configuration.setAllowedOrigins(List.of("*"));
          configuration.setAllowedHeaders(List.of("*"));
          configuration.setAllowedMethods(List.of("*"));
          UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
