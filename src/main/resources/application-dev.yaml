@@ -23,5 +23,8 @@ jwt:
   public-key: classpath:certs/public-key.pem
   private-key: classpath:certs/private-key.pem
 
+server:
+  port : 5000
+
 client:
   url: ${REACT_CLIENT_URL} 
