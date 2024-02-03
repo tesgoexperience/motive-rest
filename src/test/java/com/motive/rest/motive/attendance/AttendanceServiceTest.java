@@ -6,8 +6,6 @@ import com.motive.rest.motive.Motive;
 import com.motive.rest.motive.MotiveService;
 import com.motive.rest.motive.attendance.dto.AttendanceDTO;
 import com.motive.rest.user.User;
-import com.motive.rest.user.UserService;
-import com.motive.rest.user.friendship.FriendshipService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -35,11 +33,7 @@ class AttendanceServiceTest {
     @Mock
     AttendanceRepo repo;
     @Mock
-    UserService userService;
-    @Mock
     AuthService authService;
-    @Mock
-    FriendshipService friendshipService;
     @Mock
     MotiveService motiveService;
     @InjectMocks
