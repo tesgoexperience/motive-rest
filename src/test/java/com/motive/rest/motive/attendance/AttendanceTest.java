@@ -36,7 +36,6 @@ public class AttendanceTest {
     private MvcUtil mvcUtil;
     private SocialUtil socialUtil;
     private JSONObject social;
-    private Faker faker = new Faker();
 
     @Before
     public void createContext() throws Exception {
@@ -192,10 +191,8 @@ public class AttendanceTest {
         assertThat(!updatedAttendance.isEmpty());
         assertEquals(friend.get("username"), updatedAttendance.get(0));
 
-
         mvcUtil.postRequest("/attendance/remove", json.attendanceResponseObject(friend.get("username").toString(), motiveId).toJSONString(),
                 token);
-
 
         // get managed motives again and assert the attendance array after the user has been removed from the attendance list.
         JSONObject thirdManagedMotiveDTO = (JSONObject) mvcUtil.getRequest("/motive/managing", token)

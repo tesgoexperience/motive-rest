@@ -116,6 +116,4 @@ public class FriendshipTest {
         System.out.println("Response is " + searchResultDTO);
         assertEquals(yourHashMap.get("username"), searchResultDTO.get("username"));
     }
-
-
 }
