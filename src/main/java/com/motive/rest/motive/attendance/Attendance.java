@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.motive.rest.motive.Motive;
 import com.motive.rest.user.User;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,12 +12,12 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 @JsonIgnoreType
 @Entity

@@ -1,36 +1,17 @@
 package com.motive.rest.security;
 
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 
-import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
-
-
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 
@@ -39,69 +20,30 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @EnableWebSecurity
+@Configuration
 public class SecurityConfig {
-
-    @Value("${jwt.public-key}")
-    private RSAPublicKey rsaPublicKey;
-
-    @Value("${jwt.private-key}")
-    private RSAPrivateKey rsaPrivateKey;
 
     @Value("${client.url}")
     private String reactClient;
     
-    /*
-     * Take a http security object and customize it by adding jwt authentication
-     */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public WebSecurityCustomizer webSecurityCustomizer() {
+         return (web) -> web.debug(true); //TODO move to value from properties
+    }
 
-        return http.cors().and()
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+    @Bean
+    public SecurityFilterChain generalSecurityFilterChain(HttpSecurity http) throws Exception {
+
+        return http.cors(cors -> cors.configurationSource(corsConfigurationSource())).csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+                .authorizeHttpRequests(auth -> auth.requestMatchers(  "/register").permitAll())
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .oauth2ResourceServer(ouath2 -> ouath2.jwt(Customizer.withDefaults()))
+                .httpBasic(Customizer.withDefaults())
                 .exceptionHandling(
                         (ex) -> ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
                                 .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
                 .build();
-    }
-    /*
-     * This will allow the /token endpoint to use basic auth and everything else
-     * uses the SFC above
-     */
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    @Bean
-    SecurityFilterChain tokenSecurityFilterChain(HttpSecurity http) throws Exception {
-
-        return http.cors().and()
-                    .requestMatchers().antMatchers("/login","/register").and()
-                    .authorizeHttpRequests(auth -> auth.antMatchers("/register").permitAll().anyRequest().authenticated())
-                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .exceptionHandling(ex -> {
-                        ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
-                        ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
-                    })
-                    .httpBasic(Customizer.withDefaults())
-                    .build();
-    }
-
-    @Bean
-    JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey(rsaPublicKey).build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    JwtEncoder jwtEncoder() {
-        JWK jwk = new RSAKey.Builder(rsaPublicKey).privateKey(rsaPrivateKey).build();
-        JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
-        return new NimbusJwtEncoder(jwks);
     }
 
      // Used by spring security if CORS is enabled.

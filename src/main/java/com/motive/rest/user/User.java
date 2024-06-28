@@ -1,28 +1,27 @@
 package com.motive.rest.user;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.motive.rest.Auth.AuthDetails;
 import lombok.*;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 
-// Removed @NoArgsConstructor annotation
-
-@Entity @JsonIgnoreProperties @NoArgsConstructor
+@Entity 
+@JsonIgnoreProperties 
+@NoArgsConstructor
 @Getter
 @Setter
 public class User {
@@ -30,7 +29,6 @@ public class User {
     @Id
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID id;
 
     @NonNull

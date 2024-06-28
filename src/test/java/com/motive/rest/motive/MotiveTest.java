@@ -86,7 +86,7 @@ public class MotiveTest {
 				new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
 						.format(faker.date().past(3, TimeUnit.DAYS)));
 		SimpleResponse res = mvcUtil.postRequest("/motive/create/", motive.toJSONString(), token);
-		assertEquals(res.getStatus(), HttpStatus.BAD_REQUEST);
+		assertEquals(HttpStatus.BAD_REQUEST,res.getStatus());
 		assertTrue(res.getBody().contains("Start date cannot be in the past"));
 	}
 

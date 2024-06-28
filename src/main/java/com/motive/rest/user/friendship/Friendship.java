@@ -1,6 +1,6 @@
 package com.motive.rest.user.friendship;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import com.motive.rest.chat.Chat;
 import com.motive.rest.user.User;
@@ -11,12 +11,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 
 @NoArgsConstructor
 @Getter

@@ -9,6 +9,3 @@ openssl rsa -in ./src/main/resources/certs/private-key.pem -pubout -out ./src/ma
 
 head -n 1 ./src/main/resources/certs/public-key.pem;
 head -n 1 ./src/main/resources/certs/private-key.pem;
-
-
-# Test mariadb
