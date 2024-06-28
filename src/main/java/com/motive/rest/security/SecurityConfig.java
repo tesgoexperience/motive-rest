@@ -49,12 +49,12 @@ public class SecurityConfig {
      // Used by spring security if CORS is enabled.
      @Bean
      CorsConfigurationSource corsConfigurationSource() {
-         CorsConfiguration configuration = new CorsConfiguration();
+         CorsConfiguration configuration = new CorsConfiguration(); 
          configuration.setAllowedOrigins(List.of("*"));
          configuration.setAllowedHeaders(List.of("*"));
          configuration.setAllowedMethods(List.of("*"));
          UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-         source.registerCorsConfiguration("/**", configuration);
+         source.registerCorsConfiguration("/**", configuration); //TODO only allow react client 
          return source;
      }
 }
