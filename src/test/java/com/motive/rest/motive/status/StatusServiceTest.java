@@ -167,7 +167,6 @@ class StatusServiceTest {
 
         // Assert
         assertTrue(result);
-
     }
 
     @Test
@@ -197,7 +196,6 @@ class StatusServiceTest {
                 () -> {
                     statusService.getById(statusId);
                 });
-
     }
 
 
@@ -216,7 +214,6 @@ class StatusServiceTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(repo, times(1)).save(any(Status.class)); // Ensure that the save method is called
     }
-
 
     @Test
     public void testGetInterests_Successful() {
