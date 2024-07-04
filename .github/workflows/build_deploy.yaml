@@ -1,11 +1,6 @@
-name: Deployment
-on:
-  push:
-    branches:
-      - build
-  pull_request:
-    branches:
-      - build
+name: BuildTest
+
+on: push
 
 permissions:
   contents: read
