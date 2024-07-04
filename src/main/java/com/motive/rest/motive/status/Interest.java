@@ -1,4 +1,5 @@
 package com.motive.rest.motive.status;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.motive.rest.user.User;
 
@@ -8,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
+import java.util.UUID;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,9 +28,9 @@ import jakarta.persistence.UniqueConstraint;
 @EqualsAndHashCode
 @Table(uniqueConstraints = {@UniqueConstraint(name = "DUPLICATE_INTEREST_ENTRY", columnNames = { "status_id", "user_id" }) })
 public class Interest {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Id
-    private Long id;
+    private UUID id;
     
     @ManyToOne
     Status status;

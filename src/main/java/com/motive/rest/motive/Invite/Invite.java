@@ -1,4 +1,6 @@
 package com.motive.rest.motive.Invite;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.motive.rest.motive.Motive;
 import com.motive.rest.user.User;
@@ -27,9 +29,9 @@ import jakarta.persistence.UniqueConstraint;
 @EqualsAndHashCode
 @Table(uniqueConstraints = {@UniqueConstraint(name = "DUPLICATE_INVITE_ENTRY", columnNames = { "motive_id", "user_id" }) })
 public class Invite {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Id
-    private Long id;
+    private UUID id;
     
     @ManyToOne
     Motive motive;

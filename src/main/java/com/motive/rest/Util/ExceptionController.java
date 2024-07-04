@@ -59,7 +59,6 @@ public class ExceptionController {
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public String handleServerErrors(Exception ex) {
-        System.err.println(ex);
         return "Sorry, something went wrong :( " + ex.getMessage();
     }
 }

@@ -47,7 +47,7 @@ public class ChatUtil {
     }
 
     public JSONObject getFriendChatPreview(String friendUsername, String token) throws Exception {
-        return mvcUtil.getRequest("/chat/friend/?friendUsername=" + friendUsername,
+        return mvcUtil.getRequest("/chat/friend?friendUsername=" + friendUsername,
                 token)
                 .getBodyAsJson();
     }

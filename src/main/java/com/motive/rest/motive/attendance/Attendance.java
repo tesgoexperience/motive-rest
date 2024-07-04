@@ -1,5 +1,7 @@
 package com.motive.rest.motive.attendance;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.motive.rest.motive.Motive;
 import com.motive.rest.user.User;
@@ -31,9 +33,9 @@ public class Attendance {
 
     public enum ATTENDANCE_STATUS {CONFIRMED, REQUESTED}
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Id
-    private Long id;
+    private UUID id;
 
     @ManyToOne
     private Motive motive;

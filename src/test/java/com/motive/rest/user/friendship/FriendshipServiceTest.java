@@ -104,7 +104,7 @@ class FriendshipServiceTest {
 
         // Mock the repository's behavior
         when(authService.getAuthUser()).thenReturn(authUser);
-        when(repo.findRequestsRecieved(any(String.class), any(boolean.class))).thenReturn(receivedRequests);
+        when(repo.findRequestsRecieved(any(UUID.class), any(boolean.class))).thenReturn(receivedRequests);
 
         // Call the method to test
         List<User> receivedUsers = friendshipService.getRequestsRecieved(true);
@@ -136,7 +136,7 @@ class FriendshipServiceTest {
         );
 
         // Mock the repository's behavior
-        when(repo.findRequestsRecieved(any(String.class), any(boolean.class))).thenReturn(pendingRequests);
+        when(repo.findRequestsRecieved(any(UUID.class), any(boolean.class))).thenReturn(pendingRequests);
 
         // Call the method to test
         List<User> pendingUsers = friendshipService.getRequestsRecieved(false);
@@ -172,7 +172,7 @@ class FriendshipServiceTest {
         );
 
         // Mock the repository's behavior
-        when(repo.findRequestsSent(any(String.class), any(boolean.class))).thenReturn(sentRequests);
+        when(repo.findRequestsSent(any(UUID.class), any(boolean.class))).thenReturn(sentRequests);
 
         // Call the method to test
         List<User> sentUsers = friendshipService.getRequestsSent(true);
@@ -204,7 +204,7 @@ class FriendshipServiceTest {
         );
 
         // Mock the repository's behavior
-        when(repo.findRequestsSent(any(String.class), any(boolean.class))).thenReturn(pendingRequests);
+        when(repo.findRequestsSent(any(UUID.class), any(boolean.class))).thenReturn(pendingRequests);
 
         // Call the method to test
         List<User> pendingUsers = friendshipService.getRequestsSent(false);

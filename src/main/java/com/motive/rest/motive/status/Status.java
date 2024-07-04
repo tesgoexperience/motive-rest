@@ -1,6 +1,7 @@
 package com.motive.rest.motive.status;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.Date;
 
 import jakarta.persistence.CascadeType;
@@ -33,9 +34,9 @@ import lombok.EqualsAndHashCode;
 @ToString
 @EqualsAndHashCode
 public class Status {
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Id
-    private Long id;
+    private UUID id;
     
     @ManyToOne
     private User owner;

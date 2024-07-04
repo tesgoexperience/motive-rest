@@ -17,5 +17,5 @@ public interface MotiveRepo extends CrudRepository<Motive, UUID> {
     @Query(value = "SELECT * FROM motive WHERE cancelled=FALSE AND end > NOW()", nativeQuery = true)
     List<Motive> findByOngoing();
     @Query(value = "SELECT * FROM motive WHERE cancelled=FALSE AND end > NOW() AND owner_id=?1", nativeQuery = true)
-    List<Motive> findByOngoingWithOwner(String owner);
+    List<Motive> findByOngoingWithOwner(UUID owner);
 }

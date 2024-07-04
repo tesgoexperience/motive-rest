@@ -1,9 +1,7 @@
 package com.motive.rest.chat;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,7 +24,6 @@ import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 import com.motive.rest.user.friendship.Friendship;
 import com.motive.rest.user.friendship.FriendshipService;
-import org.springframework.data.domain.Sort.Direction;
 
 import java.util.stream.Collectors;
 
@@ -49,7 +46,7 @@ public class ChatService {
     public List<ChatPreviewDTO> getChatPreview() {
         User user = authService.getAuthUser();
 
-        List<Chat> getAllChats = repo.getChats(user.getId().toString());
+        List<Chat> getAllChats = repo.getChats(user.getId());
 
         // put the chats this user is not upto date with first
         List<Chat> sortedChat = getAllChats.stream()
@@ -187,7 +184,7 @@ public class ChatService {
             }
         }
 
-        return repo.getChats(authService.getAuthUser().getId().toString()).size() != chats.size();
+        return repo.getChats(authService.getAuthUser().getId()).size() != chats.size();
     }
 
     public boolean checkMessagesUpdate(String headMessageId, String chatId ){

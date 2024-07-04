@@ -1,6 +1,7 @@
 package com.motive.rest.motive.status;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,20 +38,20 @@ public class StatusController {
 
     @PostMapping(value = "/interest/add")
     @ResponseBody
-    public ResponseEntity<Boolean> addInterest(@RequestBody Long status) {
-        return new ResponseEntity<Boolean>(service.showInterest(status, true), HttpStatus.OK);
+    public ResponseEntity<Boolean> addInterest(@RequestBody String status) {
+        return new ResponseEntity<Boolean>(service.showInterest(UUID.fromString(status), true), HttpStatus.OK);
     }
 
     @PostMapping(value = "/interest/remove")
     @ResponseBody
-    public ResponseEntity<Boolean> removeInterest(@RequestBody Long status) {
-        return new ResponseEntity<Boolean>(service.showInterest(status, false), HttpStatus.OK);
+    public ResponseEntity<Boolean> removeInterest(@RequestBody String status) {
+        return new ResponseEntity<Boolean>(service.showInterest(UUID.fromString(status), false), HttpStatus.OK);
     }
 
     @GetMapping(value = "/interest/") // returns a list of usernames of the people who are interested in this status
     @ResponseBody
-    public List<String> getInterests(@RequestParam Long status) {
-        return service.getInterests(status);
+    public List<String> getInterests(@RequestParam String status) {
+        return service.getInterests(UUID.fromString(status));
     }
 
 }

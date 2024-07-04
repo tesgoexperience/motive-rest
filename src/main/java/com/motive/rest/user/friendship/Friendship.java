@@ -17,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import java.util.UUID;
 
 @NoArgsConstructor
 @Getter
@@ -26,9 +27,9 @@ import jakarta.persistence.OneToOne;
 @EqualsAndHashCode
 public class Friendship {
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name="sender_id", nullable=false)

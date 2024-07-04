@@ -6,12 +6,10 @@ import java.util.List;
 import java.util.UUID;
 
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
-
-
-import org.hibernate.annotations.GenericGenerator;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,9 +34,9 @@ import com.motive.rest.user.friendship.Friendship;
 @ToString
 @EqualsAndHashCode
 public class Chat {
+
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     public enum TYPE {
