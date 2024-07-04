@@ -180,7 +180,7 @@ public class MotiveService {
     }
 
     public List<MotiveDTO> manageMotives() {
-        List<Motive> motives = repo.findByOngoingWithOwner(authService.getAuthUser().getId().toString());
+        List<Motive> motives = repo.findByOngoingWithOwner(authService.getAuthUser().getId());
         return convertMotiveToDTO(motives);
     }
 

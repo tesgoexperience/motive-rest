@@ -1,5 +1,7 @@
 package com.motive.rest.motive.attendance.dto;
 
+import java.util.UUID;
+
 import com.motive.rest.dto.DTO;
 import com.motive.rest.motive.Motive;
 import com.motive.rest.motive.attendance.Attendance.ATTENDANCE_STATUS;
@@ -12,7 +14,7 @@ import lombok.Setter;
 public class AttendanceDTO implements DTO{
     @Getter @Setter private ATTENDANCE_STATUS status;
     @Getter @Setter private boolean anonymous;
-    @Getter @Setter private Long id;
+    @Getter @Setter private UUID id;
 
     @Setter private User user;
     @Setter private Motive motive;

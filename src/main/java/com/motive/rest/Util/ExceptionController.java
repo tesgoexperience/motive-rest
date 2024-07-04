@@ -16,9 +16,9 @@ import com.motive.rest.exceptions.BadUserInput;
 public class ExceptionController {
 
     /**
-     * This method hands javax constraint validation failures for DTOs.
+     * This method hands jakarta constraint validation failures for DTOs.
      * 
-     * @param ex the exception thrown by the javax validator
+     * @param ex the exception thrown by the jakarta validator
      * @return a map of <Field, error message> e.g. <"username", "username cannot be
      *         null">
      */
@@ -52,13 +52,13 @@ public class ExceptionController {
      * This method handles all other errors thrown that do not have a handler
      * already implemented
      * 
-     * @param ex the exception thrown by the javax validator
+     * @param ex the exception thrown by the jakarta validator
      * @return
      */
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     @ResponseBody
     public String handleServerErrors(Exception ex) {
-        return "Sorry, something went wrong :(";
+        return "Sorry, something went wrong :( " + ex.getMessage();
     }
 }

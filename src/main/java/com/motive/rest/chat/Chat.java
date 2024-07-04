@@ -5,14 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToOne;
-
-
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,8 +17,8 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreType;
 import com.motive.rest.chat.message.Message;
@@ -37,10 +34,9 @@ import com.motive.rest.user.friendship.Friendship;
 @ToString
 @EqualsAndHashCode
 public class Chat {
+
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "uuid2")
-    @Type(type = "uuid-char")
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     public enum TYPE {

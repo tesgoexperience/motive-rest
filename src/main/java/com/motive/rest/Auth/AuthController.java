@@ -1,6 +1,6 @@
 package com.motive.rest.Auth;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,7 +36,6 @@ public class AuthController {
         service.createUser(createUser);
     }
     
-    @PreAuthorize("isAuthenticated()")
     @PostMapping(value = "/notification/add-token")
     @ResponseBody
     public boolean registerToken(@RequestBody String token) {

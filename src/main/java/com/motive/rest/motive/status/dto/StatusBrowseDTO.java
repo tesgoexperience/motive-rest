@@ -11,7 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter @Setter
 public class StatusBrowseDTO {
-    Long id;
+    String id;
     String title;
     String owner;
     Date timePosted;

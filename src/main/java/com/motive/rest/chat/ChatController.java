@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,7 +23,6 @@ import com.motive.rest.exceptions.EntityNotFound;
 
 @Controller
 @RequestMapping(path = "/chat")
-@PreAuthorize("isAuthenticated()")
 public class ChatController {
     @Autowired
     ChatService service;

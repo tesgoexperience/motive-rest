@@ -22,6 +22,6 @@ logging:
 jwt:
   public-key: 'classpath:certs/public-key.pem'
   private-key: 'classpath:certs/private-key.pem'
-
+     
 client:
   url: localhost

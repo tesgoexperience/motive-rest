@@ -38,20 +38,19 @@ public class AuthTest {
 
     @Test
     public void register() throws Exception {
-        assertEquals(5, "world".length());
-        assertEquals(mvcUtil.postRequest("/register", json.userObject().toJSONString()).getStatus(),
-                HttpStatus.OK);
+        assertEquals( HttpStatus.OK, mvcUtil.postRequest("/register", json.userObject().toJSONString()).getStatus());
     }
 
     @Test
     public void login() throws Exception {
         JSONObject user = json.userObject();
-        assertEquals(mvcUtil.postRequest("/register", user.toJSONString()).getStatus(), HttpStatus.OK);
+        assertEquals(HttpStatus.OK, mvcUtil.postRequest("/register", user.toJSONString()).getStatus());
 
-        SimpleResponse response = mvcUtil.postRequest("/login", "", user.get("email").toString(), user.get("password").toString());
+        SimpleResponse response = mvcUtil.postRequest("/login", "", user.get("email").toString(),
+                user.get("password").toString());
         assertEquals(response.getStatus(), HttpStatus.OK);
         assertTrue(response.getBody().contains("Bearer"));
-        assertEquals(mvcUtil.getRequest("/user/", response.getBody()).getStatus(), HttpStatus.OK);
+        assertEquals(HttpStatus.OK, mvcUtil.getRequest("/user/", response.getBody()).getStatus());
 
         SimpleResponse username = mvcUtil.getRequest("/user/", response.getBody());
         assertEquals(user.get("username"), username.getBody());
@@ -124,7 +123,6 @@ public class AuthTest {
                 .contains("must be a well-formed email address"));
     }
 
-
     @Test
     public void register_with_invalid_username() throws Exception {
         JSONObject user = json.userObject();
@@ -135,6 +133,5 @@ public class AuthTest {
         assertTrue(response.getBodyAsJson().get("email").toString()
                 .contains("must be a well-formed email address"));
     }
-
 
 }

@@ -18,7 +18,7 @@ public class MotiveUtil {
     public JSONObject anyMotive(String ownerToken) throws Exception {
         // create motive
         return mvcUtil
-                .postRequest("/motive/create/", json.motiveObject("FRIENDS").toJSONString(), ownerToken)
+                .postRequest("/motive/create", json.motiveObject("FRIENDS").toJSONString(), ownerToken)
                 .getBodyAsJson();
 
     }

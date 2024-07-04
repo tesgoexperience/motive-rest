@@ -36,7 +36,7 @@ public class AttendanceTest {
     private MvcUtil mvcUtil;
     private SocialUtil socialUtil;
     private JSONObject social;
-
+  
     @Before
     public void createContext() throws Exception {
         mvcUtil = new MvcUtil(mvc);
@@ -51,7 +51,7 @@ public class AttendanceTest {
         JSONObject friend = (JSONObject) ((JSONArray) social.get("friends")).get(0);
 
         // create a motive
-        SimpleResponse res = mvcUtil.postRequest("/motive/create/",
+        SimpleResponse res = mvcUtil.postRequest("/motive/create",
                 json.motiveObject("FRIENDS").toJSONString(), token);
         String motiveId = res.getBodyAsJson().getAsString("id");
 
@@ -77,7 +77,7 @@ public class AttendanceTest {
         JSONObject friend = (JSONObject) ((JSONArray) social.get("friends")).get(0);
 
         // create a motive
-        SimpleResponse res = mvcUtil.postRequest("/motive/create/",
+        SimpleResponse res = mvcUtil.postRequest("/motive/create",
                 json.motiveObject("FRIENDS").toJSONString(), token);
         String motiveId = res.getBodyAsJson().getAsString("id");
 
@@ -119,7 +119,7 @@ public class AttendanceTest {
         JSONObject friend = (JSONObject) ((JSONArray) social.get("friends")).get(0);
 
         // create a motive
-        SimpleResponse res = mvcUtil.postRequest("/motive/create/",
+        SimpleResponse res = mvcUtil.postRequest("/motive/create",
                 json.motiveObject("FRIENDS").toJSONString(), token);
         String motiveId = res.getBodyAsJson().getAsString("id");
 
@@ -156,7 +156,7 @@ public class AttendanceTest {
         JSONObject friend = (JSONObject) ((JSONArray) social.get("friends")).get(0);
 
         // create a motive
-        SimpleResponse res = mvcUtil.postRequest("/motive/create/",
+        SimpleResponse res = mvcUtil.postRequest("/motive/create",
                 json.motiveObject("FRIENDS").toJSONString(), token);
         String motiveId = res.getBodyAsJson().getAsString("id");
 
@@ -208,7 +208,7 @@ public class AttendanceTest {
         JSONObject friend = (JSONObject) ((JSONArray) social.get("friends")).get(0);
 
         // create a motive
-        SimpleResponse res = mvcUtil.postRequest("/motive/create/",
+        SimpleResponse res = mvcUtil.postRequest("/motive/create",
                 json.motiveObject("FRIENDS").toJSONString(), token);
         String motiveId = res.getBodyAsJson().getAsString("id");
 

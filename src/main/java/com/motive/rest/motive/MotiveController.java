@@ -23,7 +23,6 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 @RequestMapping(path = "/motive")
-@PreAuthorize("isAuthenticated()")
 public class MotiveController {
 
     @Autowired

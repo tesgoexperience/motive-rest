@@ -13,7 +13,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Autowired
 	private final AuthRepo repository;
 
-	@Autowired
 	public CustomUserDetailsService(AuthRepo repository) {
 		this.repository = repository;
 	}

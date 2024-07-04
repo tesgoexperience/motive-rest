@@ -51,8 +51,6 @@ public class FriendshipTest {
     @Test
     public void acceptFriendRequest() throws UnsupportedEncodingException, Exception {
         String token = socialUtil.getToken(social);
-        JSONArray totalIncomingRequests =  (JSONArray) social.get("incomingRequests");
-//        System.out.println("Totals incoming requests are" + totalIncomingRequests.size());
 
         // Get a summary
         SimpleResponse summary =  mvcUtil.getRequest("/friendship/", token);

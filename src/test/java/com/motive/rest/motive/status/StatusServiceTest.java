@@ -73,6 +73,8 @@ class StatusServiceTest {
 
 
         Status status1 = new Status("testStatus", friend1);
+        status1.setCreateDate(new Date());
+        status1.setId(uuid);
         Interest interest = new Interest(status1, currentUser);
 
         List<Interest> interests = Arrays.asList(interest, interest);
@@ -126,7 +128,7 @@ class StatusServiceTest {
     @Test
     public void testShowInterest_SuccessfulInterestAddition() {
         // Arrange
-        Long statusId = 1L;
+        UUID statusId = UUID.randomUUID();
         boolean add = true;
 
         UUID uuid = UUID.randomUUID();
@@ -170,7 +172,7 @@ class StatusServiceTest {
     @Test
     public void testGetById_Successful() {
         // Arrange
-        Long statusId = 1L;
+        UUID statusId = UUID.randomUUID();
         Status expectedStatus = new Status();
 
         when(repo.findById(statusId)).thenReturn(Optional.of(expectedStatus));
@@ -185,7 +187,7 @@ class StatusServiceTest {
     @Test()
     public void testGetById_EntityNotFound() {
         // Arrange
-        Long statusId = 1L;
+        UUID statusId = UUID.randomUUID();
 
         when(repo.findById(statusId)).thenReturn(Optional.empty());
 
@@ -216,7 +218,7 @@ class StatusServiceTest {
     @Test
     public void testGetInterests_Successful() {
         // Arrange
-        Long statusId = 1L;
+        UUID statusId = UUID.randomUUID();
         User currentUser = new User("TestUser");
         UUID uuid = UUID.randomUUID();
         AuthDetails authDetails = new AuthDetails("test@email.com", "testPass", new User("3"));
@@ -232,7 +234,7 @@ class StatusServiceTest {
         status.setInterest(interests);
 
         when(authService.getAuthUser()).thenReturn(currentUser);
-        when(repo.findById(any(Long.class))).thenReturn(Optional.of(status));
+        when(repo.findById(any(UUID.class))).thenReturn(Optional.of(status));
         when(authService.getAuthUser()).thenReturn(currentUser);
 
         // Act
@@ -245,7 +247,7 @@ class StatusServiceTest {
     @Test()
     public void testGetInterests_UnauthorizedRequest() {
         // Arrange
-        Long statusId = 1L;
+        UUID statusId = UUID.randomUUID();
         User currentUser = new User("TestUser");
         UUID uuid = UUID.randomUUID();
         AuthDetails authDetails = new AuthDetails("test@email.com", "testPass", new User("3"));
@@ -267,7 +269,7 @@ class StatusServiceTest {
         status.setInterest(interests);
 
         when(authService.getAuthUser()).thenReturn(currentUser);
-        when(repo.findById(any(Long.class))).thenReturn(Optional.of(status));
+        when(repo.findById(any(UUID.class))).thenReturn(Optional.of(status));
         when(authService.getAuthUser()).thenReturn(randomUser);
 
         // Act
@@ -281,7 +283,6 @@ class StatusServiceTest {
     @Test
     public void testValidateOwnership_Successful() {
         // Arrange
-        Long statusId = 1L;
         User currentUser = new User("TestUser");
         UUID uuid = UUID.randomUUID();
         AuthDetails authDetails = new AuthDetails("test@email.com", "testPass", new User("3"));
@@ -314,7 +315,6 @@ class StatusServiceTest {
     public void testValidateOwnership_UnauthorizedRequest() {
         // Arrange
         // Arrange
-        Long statusId = 1L;
         User currentUser = new User("TestUser");
         UUID uuid = UUID.randomUUID();
         AuthDetails authDetails = new AuthDetails("test@email.com", "testPass", new User("3"));

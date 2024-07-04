@@ -57,7 +57,7 @@ public class MotiveTest {
 		JSONObject friend = socialUtil.createFriend((JSONObject)social.get("user"));
 
 		// create a motive
-		SimpleResponse res = mvcUtil.postRequest("/motive/create/",
+		SimpleResponse res = mvcUtil.postRequest("/motive/create",
 				json.motiveObject("FRIENDS").toJSONString(), token);
  		String motiveId = res.getBodyAsJson().getAsString("id");
 
@@ -85,8 +85,8 @@ public class MotiveTest {
 		motive.put("start",
 				new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
 						.format(faker.date().past(3, TimeUnit.DAYS)));
-		SimpleResponse res = mvcUtil.postRequest("/motive/create/", motive.toJSONString(), token);
-		assertEquals(res.getStatus(), HttpStatus.BAD_REQUEST);
+		SimpleResponse res = mvcUtil.postRequest("/motive/create", motive.toJSONString(), token);
+		assertEquals(HttpStatus.BAD_REQUEST,res.getStatus());
 		assertTrue(res.getBody().contains("Start date cannot be in the past"));
 	}
 
@@ -101,7 +101,7 @@ public class MotiveTest {
 				new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS")
 						.format(faker.date().future(2, 1, TimeUnit.DAYS)));
 
-		SimpleResponse res = mvcUtil.postRequest("/motive/create/", motive.toJSONString(), token);
+		SimpleResponse res = mvcUtil.postRequest("/motive/create", motive.toJSONString(), token);
 		assertEquals(res.getStatus(), HttpStatus.BAD_REQUEST);
 		assertTrue(res.getBody().contains("end date cannot before start"));
 	}
@@ -112,7 +112,7 @@ public class MotiveTest {
 		JSONObject friend = socialUtil.createFriend((JSONObject)social.get("user"));
 		JSONObject stranger = (JSONObject) ((JSONArray) social.get("outgoingRequests")).get(0);
 		// create a motive
-		SimpleResponse res = mvcUtil.postRequest("/motive/create/", json.motiveObject("FRIENDS").toJSONString(),
+		SimpleResponse res = mvcUtil.postRequest("/motive/create", json.motiveObject("FRIENDS").toJSONString(),
 				token);
 		JSONObject motive = json.toJsonObject(res.getBody());
 		assertEquals(res.getStatus(), HttpStatus.OK);
@@ -140,7 +140,7 @@ public class MotiveTest {
 		// create motive
 		JSONArray jsonArray = new JSONArray();
 		jsonArray.add(selectedFriend);
-		SimpleResponse res = mvcUtil.postRequest("/motive/create/",
+		SimpleResponse res = mvcUtil.postRequest("/motive/create",
 				json.motiveObjectSpecificFriends(jsonArray).toJSONString(), token);
 		JSONObject motive = json.toJsonObject(res.getBody());
 
@@ -160,7 +160,7 @@ public class MotiveTest {
 	public void getMotiveStats() throws UnsupportedEncodingException, Exception {
 		String token = socialUtil.getToken(social);
 
-		mvcUtil.postRequest("/motive/create/", json.motiveObject("FRIENDS").toJSONString(), token);
+		mvcUtil.postRequest("/motive/create", json.motiveObject("FRIENDS").toJSONString(), token);
 
 	 	assertEquals(1L, mvcUtil.getRequest("/motive/stats", token).getBodyAsJson().getAsNumber("attending"));
 	}

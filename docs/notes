@@ -1,0 +1,3 @@
+Deploying to EB,
+
+Don't forget to set the springboot port to 5000 as that is the port eb listens to.

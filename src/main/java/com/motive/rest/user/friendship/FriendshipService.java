@@ -51,7 +51,7 @@ public class FriendshipService {
      * 
      */
     public List<User> getFriends() {
-        return extractFriends(repo.findApprovedRequests(authService.getAuthUser().getId().toString()));
+        return extractFriends(repo.findApprovedRequests(authService.getAuthUser().getId()));
     }
 
     /**
@@ -63,7 +63,7 @@ public class FriendshipService {
      * @return the users this user has recieved requests from
      */
     public List<User> getRequestsRecieved(boolean includeApproved) {
-        return extractFriends(repo.findRequestsRecieved(authService.getAuthUser().getId().toString(), includeApproved));
+        return extractFriends(repo.findRequestsRecieved(authService.getAuthUser().getId(), includeApproved));
     }
 
     /**
@@ -74,7 +74,7 @@ public class FriendshipService {
      * @return the users this user has sent requests
      */
     public List<User> getRequestsSent(boolean includeApproved) {
-        return extractFriends(repo.findRequestsSent(authService.getAuthUser().getId().toString(), includeApproved));
+        return extractFriends(repo.findRequestsSent(authService.getAuthUser().getId(), includeApproved));
     }
 
     /**
@@ -128,8 +128,8 @@ public class FriendshipService {
     }
 
     public Friendship getFriendshipWithUser(User friend) throws EntityNotFound {
-        Optional<Friendship> friendship = repo.findFriendship(authService.getAuthUser().getId().toString(),
-                friend.getId().toString());
+        Optional<Friendship> friendship = repo.findFriendship(authService.getAuthUser().getId(),
+                friend.getId());
 
         if (friendship.isPresent()) {
             return friendship.get();

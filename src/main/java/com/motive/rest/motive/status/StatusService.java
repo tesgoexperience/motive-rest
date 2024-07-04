@@ -2,6 +2,7 @@ package com.motive.rest.motive.status;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,11 +71,11 @@ public class StatusService {
     private StatusBrowseDTO toStatusBrowseDTO(Status status) {
         User currentUser = authService.getAuthUser();
 
-        return new StatusBrowseDTO(status.getId(), status.getTitle(), status.getOwner().getUsername(),
+        return new StatusBrowseDTO(status.getId().toString(), status.getTitle(), status.getOwner().getUsername(),
                 status.getCreateDate(), currentUser.equals(status.getOwner()), getInterest(status, currentUser)!=null);
     }
 
-    public boolean showInterest(Long statusID, boolean add) {
+    public boolean showInterest(UUID statusID, boolean add) {
         // check they are friends
         User currentUser = authService.getAuthUser();
         Status status = getById(statusID);
@@ -102,7 +103,7 @@ public class StatusService {
         return true;
     }
 
-    public Status getById(Long statusID) {
+    public Status getById(UUID statusID) {
         Optional<Status> status = repo.findById(statusID);
         if (!status.isPresent()) {
             throw new EntityNotFound("status not found.");
@@ -139,7 +140,7 @@ public class StatusService {
         }
     }
 
-    public List<String> getInterests(Long statusId) {
+    public List<String> getInterests(UUID statusId) {
         Status status = getById(statusId);
         ValidateOwnership(status);
 
