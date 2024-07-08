@@ -95,7 +95,7 @@ class StatusServiceTest {
         // Mocking behavior
         when(authService.getAuthUser()).thenReturn(currentUser);
         when(friendshipService.getFriends()).thenReturn(friends);
-        when(repo.findByOwnerAndNotExpired(any(User.class))).thenReturn(userStatuses);
+        when(repo.findByOwnerAndNotExpired(any(User.class).getId())).thenReturn(userStatuses);
         when(user.getHideStatusFrom()).thenReturn(hideStatusFrom);
 
         // Ensure that the friends list and their statuses are not null
@@ -114,12 +114,12 @@ class StatusServiceTest {
         // Verify that the necessary methods were called
         verify(authService, times(4)).getAuthUser();
         verify(friendshipService, times(1)).getFriends();
-        verify(repo, times(3)).findByOwnerAndNotExpired(currentUser);
+        verify(repo, times(3)).findByOwnerAndNotExpired(currentUser.getId());
 
         // Verify that findByOwnerAndNotExpired was called for each non-null friend
         for (User friend : friends) {
             if (friend != null) {
-                verify(repo, times(3)).findByOwnerAndNotExpired(friend);
+                verify(repo, times(3)).findByOwnerAndNotExpired(friend.getId());
             }
         }
     }

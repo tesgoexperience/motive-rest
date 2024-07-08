@@ -47,11 +47,11 @@ public class StatusService {
                 friends.remove(friend);
             }
         }
-        List<StatusBrowseDTO> statusList = repo.findByOwnerAndNotExpired(currentUser).stream()
+        List<StatusBrowseDTO> statusList = repo.findByOwnerAndNotExpired(currentUser.getId()).stream()
                 .map(s -> toStatusBrowseDTO(s)).collect(Collectors.toList());
         // add the statuses by the current users
         for (User friend : friends) {
-            for (Status status : repo.findByOwnerAndNotExpired(friend)) {
+            for (Status status : repo.findByOwnerAndNotExpired(friend.getId())) {
                 statusList.add(toStatusBrowseDTO(status));
             }
         }
