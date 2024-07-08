@@ -3,6 +3,8 @@ package com.motive.rest.user;
 import jakarta.persistence.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.motive.rest.Auth.AuthDetails;
+import com.motive.rest.image.Image;
+
 import lombok.*;
 
 import jakarta.persistence.GeneratedValue;
@@ -38,6 +40,9 @@ public class User {
 
     @OneToOne(mappedBy = "owner",cascade = CascadeType.ALL)
     AuthDetails authDetails;
+    
+    @OneToOne
+    Image profilePic;
 
     public User(String username) {
         this.username = username;

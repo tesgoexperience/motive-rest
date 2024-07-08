@@ -33,7 +33,4 @@ public class TokenService {
                 .build();
         return "Bearer "+this.encoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
-
-
-
 }

@@ -3,9 +3,9 @@ package com.motive.rest.Auth;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -32,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("register")
-    public void register( @RequestBody @Valid RegisterUser createUser) throws Exception{
+    public void register(  @Valid @ModelAttribute RegisterUser createUser) throws Exception{
         service.createUser(createUser);
     }
     

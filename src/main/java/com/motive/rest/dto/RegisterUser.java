@@ -1,5 +1,7 @@
 package com.motive.rest.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -22,5 +24,6 @@ public class RegisterUser {
     @NotNull @Email
     String email;
 
-
+    // profile picture
+    MultipartFile file;
 }

@@ -1,6 +1,8 @@
 package com.motive.rest.Auth;
 
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.motive.rest.dto.RegisterUser;
 import com.motive.rest.exceptions.BadUserInput;
+import com.motive.rest.image.ImageService;
 import com.motive.rest.user.User;
 import com.motive.rest.user.UserService;
 
@@ -22,9 +25,12 @@ public class AuthService  {
     AuthRepo repo;
 
     @Autowired
+    ImageService imageService;
+
+    @Autowired
     PasswordEncoder passwordEncoder;
 
-    public void createUser(RegisterUser userDetails) {
+    public void createUser(RegisterUser userDetails) throws IOException {
 
         if (!userDetails.getConfirmPassword().equals(userDetails.getPassword())) {
             throw new BadUserInput("confirm password must match password.");
@@ -41,7 +47,14 @@ public class AuthService  {
         User user = new User(userDetails.getUsername());
         AuthDetails authDetails = new AuthDetails(userDetails.getEmail(),
                 passwordEncoder.encode(userDetails.getPassword()), user);
+
         user.setAuthDetails(authDetails);
+
+        if(userDetails.getFile() != null) {
+            user.setProfilePic(imageService.uploadImage(userDetails.getFile()));
+
+        }
+
         userService.save(user);
     }
 
